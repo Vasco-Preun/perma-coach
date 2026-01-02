@@ -3,7 +3,7 @@ import { getSettings, saveSettings } from '@/lib/data'
 
 export async function GET() {
   try {
-    const settings = getSettings()
+    const settings = await getSettings()
     return NextResponse.json(settings)
   } catch (error) {
     return NextResponse.json(
@@ -16,7 +16,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const settings = await request.json()
-    saveSettings(settings)
+    await saveSettings(settings)
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json(

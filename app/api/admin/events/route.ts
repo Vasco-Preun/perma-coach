@@ -4,7 +4,7 @@ import { verifyAdminAuth } from '@/lib/auth'
 
 export async function GET() {
   try {
-    const events = getEvents()
+    const events = await getEvents()
     return NextResponse.json(events)
   } catch (error) {
     return NextResponse.json(
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const events = await request.json()
-    saveEvents(events)
+    await saveEvents(events)
     return NextResponse.json({ success: true })
   } catch (error) {
     return NextResponse.json(

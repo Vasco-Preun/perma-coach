@@ -36,8 +36,8 @@ const toBring = [
   'Votre bonne humeur et votre envie d\'apprendre !',
 ]
 
-export default function ChantiersParticipatifsPage() {
-  const settings = getSettings()
+export default async function ChantiersParticipatifsPage() {
+  const settings = await getSettings()
 
   return (
     <>

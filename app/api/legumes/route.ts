@@ -4,7 +4,7 @@ import { verifyAdminAuth } from '@/lib/auth'
 
 export async function GET() {
   try {
-    const legumes = getLegumes()
+    const legumes = await getLegumes()
     return NextResponse.json(legumes)
   } catch (error) {
     console.error('Error getting legumes:', error)
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const legumes = await request.json()
-    saveLegumes(legumes)
+    await saveLegumes(legumes)
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error saving legumes:', error)

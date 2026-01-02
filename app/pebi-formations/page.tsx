@@ -25,9 +25,9 @@ export const metadata: Metadata = {
 export const revalidate = 0
 export const dynamic = 'force-dynamic'
 
-export default function PebiFormationsPage() {
-  const settings = getSettings()
-  const events = getEvents()
+export default async function PebiFormationsPage() {
+  const settings = await getSettings()
+  const events = await getEvents()
 
   return (
     <>

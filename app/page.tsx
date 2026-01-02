@@ -15,9 +15,9 @@ import { getSettings, getEvents } from '@/lib/data'
 export const revalidate = 0
 export const dynamic = 'force-dynamic'
 
-export default function Home() {
-  const settings = getSettings()
-  const events = getEvents()
+export default async function Home() {
+  const settings = await getSettings()
+  const events = await getEvents()
   const upcomingEvents = events
     .filter(e => {
       try {

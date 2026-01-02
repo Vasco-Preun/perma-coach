@@ -13,6 +13,7 @@
     "fix": "node scripts/fix-permissions.js"
   },
   "dependencies": {
+    "@vercel/kv": "^1.0.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.18.2",
     "next": "^14.2.0",
