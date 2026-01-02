@@ -36,49 +36,18 @@ export interface Legume {
   lotDescription?: string
 }
 
-// Fonctions pour lire/écrire les données JSON (local) ou Vercel KV (production)
-import fs from 'fs'
-import path from 'path'
-import { getKV, setKV, isUsingKV } from './kv'
+// Fonctions pour lire/écrire les données via KV (production) ou JSON (local)
+import { getKV, setKV } from './kv'
 
-const dataDir = path.join(process.cwd(), 'data')
-
-function ensureDataDir() {
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true })
-  }
-}
-
-// Fonction helper pour lire : KV en production, fichiers en local
+// Fonction helper pour lire les données
 async function readData(key: string, defaultValue: any): Promise<any> {
-  const usingKV = await isUsingKV()
-  if (usingKV) {
-    const data = await getKV(key)
-    return data !== null ? data : defaultValue
-  }
-  
-  // Fallback sur fichiers JSON
-  ensureDataDir()
-  const filePath = path.join(dataDir, `${key}.json`)
-  if (!fs.existsSync(filePath)) {
-    return defaultValue
-  }
-  const data = fs.readFileSync(filePath, 'utf-8')
-  return JSON.parse(data)
+  const data = await getKV(key)
+  return data !== null && data !== undefined ? data : defaultValue
 }
 
-// Fonction helper pour écrire : KV en production, fichiers en local
+// Fonction helper pour écrire les données
 async function writeData(key: string, value: any): Promise<void> {
-  const usingKV = await isUsingKV()
-  if (usingKV) {
-    await setKV(key, value)
-    return
-  }
-  
-  // Fallback sur fichiers JSON
-  ensureDataDir()
-  const filePath = path.join(dataDir, `${key}.json`)
-  fs.writeFileSync(filePath, JSON.stringify(value, null, 2))
+  await setKV(key, value)
 }
 
 export async function getSettings(): Promise<SiteSettings> {
@@ -93,7 +62,6 @@ export async function getSettings(): Promise<SiteSettings> {
   
   const data = await readData('settings', defaultSettings)
   if (!data) {
-    // Si aucune donnée, initialiser avec les valeurs par défaut
     await writeData('settings', defaultSettings)
     return defaultSettings
   }
@@ -138,21 +106,6 @@ export async function saveGalleryImages(images: GalleryImage[]): Promise<void> {
 }
 
 export async function getLegumes(): Promise<Legume[]> {
-  // Charger depuis data/legumes.json si disponible (pour migration)
-  ensureDataDir()
-  const filePath = path.join(dataDir, 'legumes.json')
-  if (fs.existsSync(filePath)) {
-    const data = fs.readFileSync(filePath, 'utf-8')
-    const legumes = JSON.parse(data)
-    // Migrer vers KV si nécessaire
-    const usingKV = await isUsingKV()
-    if (usingKV) {
-      await writeData('legumes', legumes)
-    }
-    return legumes
-  }
-  
-  // Sinon, lire depuis KV ou retourner les valeurs par défaut
   const defaultLegumes: Legume[] = [
     { id: 'carottes', name: 'Carottes', enabled: true, category: 'Racines', price: 3.5, unit: 'kg' },
     { id: 'poireaux', name: 'Poireaux', enabled: true, category: 'Bulbes', price: 3.5, unit: 'kg' },
@@ -182,4 +135,3 @@ export async function getEnabledLegumes(): Promise<Legume[]> {
   const legumes = await getLegumes()
   return legumes.filter(legume => legume.enabled)
 }
-

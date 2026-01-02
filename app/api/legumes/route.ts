@@ -30,8 +30,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error saving legumes:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la sauvegarde des légumes'
     return NextResponse.json(
-      { error: 'Erreur lors de la sauvegarde des légumes' },
+      { error: errorMessage },
       { status: 500 }
     )
   }

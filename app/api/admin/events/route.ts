@@ -28,8 +28,10 @@ export async function POST(request: NextRequest) {
     await saveEvents(events)
     return NextResponse.json({ success: true })
   } catch (error) {
+    console.error('Erreur sauvegarde événements:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Erreur lors de la sauvegarde'
     return NextResponse.json(
-      { error: 'Erreur lors de la sauvegarde' },
+      { error: errorMessage },
       { status: 500 }
     )
   }
