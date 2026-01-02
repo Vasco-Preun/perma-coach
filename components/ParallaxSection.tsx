@@ -31,3 +31,4 @@ export default function ParallaxSection({ children, className, speed = 0.5 }: Pa
   )
 }
 
+

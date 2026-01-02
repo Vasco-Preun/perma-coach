@@ -136,3 +136,4 @@ Perma-coach/
 - Blog/actualités
 - Intégration avec un CMS (Sanity, Strapi) si besoin de plus de flexibilité
 
+

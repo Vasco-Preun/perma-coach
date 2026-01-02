@@ -64,3 +64,4 @@ npm install next@latest
 2. Rafraîchissez la page dans Safari (Cmd + R)
 3. Le site devrait fonctionner
 
+

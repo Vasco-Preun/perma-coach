@@ -123,3 +123,4 @@ fs.writeFileSync(galleryPath, JSON.stringify(gallery, null, 2));
 console.log(`Image ajoutée : ${imageName}`);
 ```
 
+

@@ -63,3 +63,4 @@ Pour optimiser vos images avant de les ajouter :
 - Le lightbox s'ouvre au clic sur une image
 - Assurez-vous d'inclure des descriptions alt pertinentes pour l'accessibilité
 
+

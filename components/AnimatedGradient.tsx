@@ -41,3 +41,4 @@ export default function AnimatedGradient({ className = '', speed = 20 }: Animate
   )
 }
 
+

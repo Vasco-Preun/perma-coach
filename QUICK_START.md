@@ -57,3 +57,4 @@ npm start
 - `GUIDE_GALERIE.md` : Guide pour la galerie
 - `INTEGRATION_PHOTOS.md` : Intégration des photos du WeTransfer
 
+

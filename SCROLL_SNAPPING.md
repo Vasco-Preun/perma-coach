@@ -83,3 +83,4 @@ Pour désactiver temporairement :
 - Réduire la fenêtre en dessous de 1024px
 - Ou activer "Réduire les animations" dans les préférences système
 
+
