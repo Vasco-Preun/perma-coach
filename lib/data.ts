@@ -113,8 +113,8 @@ export async function getLegumes(): Promise<Legume[]> {
     { id: 'celeri-petit', name: 'Céleri (petit)', enabled: true, category: 'Tiges', price: 3.0, unit: 'pièce' },
     { id: 'pommes-terre-tendre', name: 'Pommes de terre chair tendre', enabled: true, category: 'Racines', price: 2.5, unit: 'kg' },
     { id: 'pommes-terre-ferme', name: 'Pommes de terre chair ferme', enabled: true, category: 'Racines', price: 2.5, unit: 'kg' },
-    { id: 'betterave-crue', name: 'Betterave crue', enabled: true, category: 'Racines', price: 5.0, unit: 'lot (2 pour 500g)', description: 'Lot de 2 betteraves crues (environ 500g)' },
-    { id: 'betterave-cuite', name: 'Betterave cuite', enabled: true, category: 'Racines', price: 5.0, unit: 'lot (3 pour 500g)', description: 'Lot de 3 betteraves cuites (environ 500g)' },
+    { id: 'betterave-crue', name: 'Betterave crue', enabled: true, category: 'Racines', price: 5.0, unit: 'lot (2 pour 500g)', lotDescription: 'Lot de 2 betteraves crues (environ 500g)' },
+    { id: 'betterave-cuite', name: 'Betterave cuite', enabled: true, category: 'Racines', price: 5.0, unit: 'lot (3 pour 500g)', lotDescription: 'Lot de 3 betteraves cuites (environ 500g)' },
     { id: 'butternut', name: 'Butternut', enabled: true, category: 'Cucurbitacées', price: 3.9, unit: 'pièce' },
     { id: 'potimarron', name: 'Potimarron', enabled: true, category: 'Cucurbitacées', price: 3.9, unit: 'pièce' },
   ]

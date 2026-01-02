@@ -70,8 +70,8 @@ const chapters = [
   },
 ]
 
-export default function NotreHistoirePage() {
-  const galleryImages = getGalleryImages()
+export default async function NotreHistoirePage() {
+  const galleryImages = await getGalleryImages()
 
   return (
     <>
