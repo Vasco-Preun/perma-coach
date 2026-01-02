@@ -1,13 +1,13 @@
 'use client'
 
-import { motion, useMotionValue, useSpring } from 'framer-motion'
+import { motion, useMotionValue, useSpring, HTMLMotionProps } from 'framer-motion'
 import { useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
-import Button, { ButtonProps } from '@/components/ui/Button'
 
-interface MagneticButtonProps extends Omit<ButtonProps, 'children'> {
+interface MagneticButtonProps extends Omit<HTMLMotionProps<'button'>, 'children'> {
   children: React.ReactNode
   magnetic?: boolean
+  className?: string
 }
 
 export default function MagneticButton({ 
@@ -16,7 +16,7 @@ export default function MagneticButton({
   className,
   ...props 
 }: MagneticButtonProps) {
-  const ref = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLButtonElement>(null)
   const [isHovered, setIsHovered] = useState(false)
   
   const x = useMotionValue(0)
@@ -25,7 +25,7 @@ export default function MagneticButton({
   const springX = useSpring(x, { stiffness: 500, damping: 30 })
   const springY = useSpring(y, { stiffness: 500, damping: 30 })
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!magnetic || !ref.current) return
     
     const rect = ref.current.getBoundingClientRect()
@@ -51,7 +51,7 @@ export default function MagneticButton({
   }
 
   return (
-    <motion.div
+    <motion.button
       ref={ref}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
@@ -60,12 +60,16 @@ export default function MagneticButton({
         x: springX,
         y: springY,
       }}
-      className="inline-block"
+      className={cn(
+        'inline-flex items-center justify-center rounded-2xl font-medium transition-all duration-250 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed',
+        className
+      )}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      {...props}
     >
-      <Button className={cn(className)} {...props}>
-        {children}
-      </Button>
-    </motion.div>
+      {children}
+    </motion.button>
   )
 }
 

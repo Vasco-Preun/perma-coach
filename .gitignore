@@ -36,5 +36,6 @@ yarn-error.log*
 next-env.d.ts
 
 # data
-/data/*.json
+# Les fichiers JSON de données sont commités pour avoir les données initiales en production
+# /data/*.json
 !/data/.gitkeep

@@ -11,6 +11,10 @@ import VideoBackground from '@/components/VideoBackground'
 import Image from 'next/image'
 import { getSettings, getEvents } from '@/lib/data'
 
+// Désactiver le cache pour que les modifications admin soient visibles immédiatement
+export const revalidate = 0
+export const dynamic = 'force-dynamic'
+
 export default function Home() {
   const settings = getSettings()
   const events = getEvents()

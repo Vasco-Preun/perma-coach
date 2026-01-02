@@ -36,11 +36,30 @@ export default function CheckoutPage() {
     }
   }, [])
 
-  const getTotal = () => {
+  const MINIMUM_ORDER = 15
+  const DISCOUNT_THRESHOLD = 25
+  const DISCOUNT_PERCENTAGE = 15
+  const DELIVERY_LOCATION = 'Reims'
+
+  const getSubtotal = () => {
     return cart.reduce((total, item) => {
       const price = item.price || 0
       return total + (price * item.quantity)
     }, 0)
+  }
+
+  const getDiscount = () => {
+    const subtotal = getSubtotal()
+    if (subtotal > DISCOUNT_THRESHOLD) {
+      return subtotal * (DISCOUNT_PERCENTAGE / 100)
+    }
+    return 0
+  }
+
+  const getTotal = () => {
+    const subtotal = getSubtotal()
+    const discount = getDiscount()
+    return subtotal - discount
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,6 +71,8 @@ export default function CheckoutPage() {
       const order = {
         ...formData,
         items: cart,
+        subtotal: getSubtotal(),
+        discount: getDiscount(),
         total: getTotal(),
         date: new Date().toISOString(),
       }
@@ -75,6 +96,8 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           orderId: orderData.orderId,
           amount: getTotal(),
+          subtotal: getSubtotal(),
+          discount: getDiscount(),
           items: cart,
         }),
       })
@@ -172,7 +195,7 @@ export default function CheckoutPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
-                        <span>Les légumes sont à récupérer sur place. Nous vous contacterons pour convenir d'un rendez-vous.</span>
+                        <span>Les légumes sont à récupérer à {DELIVERY_LOCATION}. Nous vous contacterons pour convenir d'un rendez-vous de récupération.</span>
                       </p>
                     </div>
                   </div>
@@ -298,16 +321,41 @@ export default function CheckoutPage() {
                       </div>
                     ))}
                   </div>
-                  <div className="pt-6 border-t-2 border-green-300/50">
-                    <div className="flex justify-between items-center mb-4">
+                  <div className="pt-6 border-t-2 border-green-300/50 space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-base text-[#1a1a1a]/70">Sous-total</span>
+                      <span className="text-lg font-semibold text-[#1a1a1a]">
+                        {getSubtotal().toFixed(2)} €
+                      </span>
+                    </div>
+                    {getDiscount() > 0 && (
+                      <div className="flex justify-between items-center bg-green-50 rounded-xl p-3">
+                        <span className="text-base font-semibold text-green-700">
+                          Remise -{DISCOUNT_PERCENTAGE}%
+                        </span>
+                        <span className="text-lg font-bold text-green-700">
+                          -{getDiscount().toFixed(2)} €
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center pt-3 border-t border-green-200/50">
                       <span className="text-xl font-bold text-[#1a1a1a]">Total</span>
                       <span className="text-3xl font-bold text-green-700">
                         {getTotal().toFixed(2)} €
                       </span>
                     </div>
-                    <p className="text-xs text-[#1a1a1a]/60 leading-relaxed">
-                      Le paiement sera finalisé lors de la récupération ou par virement bancaire.
-                    </p>
+                    <div className="pt-3 space-y-2">
+                      <div className="flex items-start gap-2 text-xs text-[#1a1a1a]/60">
+                        <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span>Récupération à {DELIVERY_LOCATION}</span>
+                      </div>
+                      <p className="text-xs text-[#1a1a1a]/60 leading-relaxed">
+                        Le paiement sera finalisé lors de la récupération ou par virement bancaire.
+                      </p>
+                    </div>
                   </div>
                 </GlassCard>
               </div>

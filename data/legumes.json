@@ -1,0 +1,86 @@
+[
+  {
+    "id": "1",
+    "name": "Carottes",
+    "enabled": true,
+    "category": "Racines",
+    "price": 3.5,
+    "unit": "kg"
+  },
+  {
+    "id": "2",
+    "name": "Poireaux",
+    "enabled": true,
+    "category": "Bulbes",
+    "price": 3.5,
+    "unit": "kg"
+  },
+  {
+    "id": "3",
+    "name": "Céleri (gros)",
+    "enabled": true,
+    "category": "Tiges",
+    "price": 4,
+    "unit": "pièce"
+  },
+  {
+    "id": "4",
+    "name": "Céleri (petit)",
+    "enabled": true,
+    "category": "Tiges",
+    "price": 3,
+    "unit": "pièce"
+  },
+  {
+    "id": "5",
+    "name": "Pommes de terre chair tendre",
+    "enabled": true,
+    "category": "Racines",
+    "price": 2.5,
+    "unit": "kg"
+  },
+  {
+    "id": "6",
+    "name": "Pommes de terre chair ferme",
+    "enabled": true,
+    "category": "Racines",
+    "price": 2.5,
+    "unit": "kg"
+  },
+  {
+    "id": "7",
+    "name": "Betterave crue",
+    "enabled": true,
+    "category": "Racines",
+    "price": 2.5,
+    "unit": "lot (2 pour 500g)",
+    "isLot": true,
+    "lotDescription": "2 pour 500g"
+  },
+  {
+    "id": "8",
+    "name": "Betterave cuite",
+    "enabled": true,
+    "category": "Racines",
+    "price": 2.5,
+    "unit": "lot (3 pour 500g)",
+    "isLot": true,
+    "lotDescription": "3 pour 500g"
+  },
+  {
+    "id": "9",
+    "name": "Butternut",
+    "enabled": true,
+    "category": "Cucurbitacées",
+    "price": 3.9,
+    "unit": "pièce"
+  },
+  {
+    "id": "10",
+    "name": "Potimarron",
+    "enabled": true,
+    "category": "Cucurbitacées",
+    "price": 3.9,
+    "unit": "pièce"
+  }
+]

@@ -21,6 +21,10 @@ export const metadata: Metadata = {
   },
 }
 
+// Désactiver le cache pour que les modifications admin soient visibles immédiatement
+export const revalidate = 0
+export const dynamic = 'force-dynamic'
+
 export default function PebiFormationsPage() {
   const settings = getSettings()
   const events = getEvents()

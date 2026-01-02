@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getLegumes, saveLegumes } from '@/lib/data'
+import { verifyAdminAuth } from '@/lib/auth'
 
 export async function GET() {
   try {
@@ -15,6 +16,14 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Vérification de l'authentification
+  if (!verifyAdminAuth(request)) {
+    return NextResponse.json(
+      { error: 'Non autorisé' },
+      { status: 401 }
+    )
+  }
+
   try {
     const legumes = await request.json()
     saveLegumes(legumes)

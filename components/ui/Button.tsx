@@ -1,16 +1,24 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, HTMLMotionProps } from 'framer-motion'
 import { buttonHover } from '@/lib/animations'
 import { cn } from '@/lib/utils'
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+type ButtonElementProps = Omit<HTMLMotionProps<'button'>, 'children' | 'className'>
+type AnchorElementProps = Omit<HTMLMotionProps<'a'>, 'children' | 'className'>
+
+interface BaseButtonProps {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
   size?: 'sm' | 'md' | 'lg'
   children: React.ReactNode
+  className?: string
   as?: 'button' | 'a'
-  href?: string
 }
+
+type ButtonProps = BaseButtonProps & (
+  | ({ as?: 'button' } & Partial<ButtonElementProps>)
+  | ({ as: 'a'; href: string } & Partial<AnchorElementProps>)
+)
 
 const variants = {
   primary: 'bg-green-700 text-white hover:bg-green-800 focus:ring-green-500',
@@ -31,24 +39,38 @@ export default function Button({
   children,
   className,
   as = 'button',
-  href,
   ...props
 }: ButtonProps) {
   const baseClasses = 'inline-flex items-center justify-center rounded-2xl font-medium transition-all duration-250 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
   
-  const Component = as === 'a' ? motion.a : motion.button
-  const componentProps = as === 'a' ? { href } : {}
+  const commonProps = {
+    className: cn(baseClasses, variants[variant], sizes[size], className),
+    whileHover: buttonHover,
+    whileTap: { scale: 0.98 },
+  }
 
+  if (as === 'a') {
+    const { href, ...anchorProps } = props as AnchorElementProps & { href: string }
+    return (
+      <motion.a
+        href={href}
+        {...commonProps}
+        {...anchorProps}
+      >
+        {children}
+      </motion.a>
+    )
+  }
+
+  const buttonProps = props as ButtonElementProps
   return (
-    <Component
-      className={cn(baseClasses, variants[variant], sizes[size], className)}
-      whileHover={buttonHover}
-      whileTap={{ scale: 0.98 }}
-      {...componentProps}
-      {...props}
+    <motion.button
+      type={buttonProps.type || 'button'}
+      {...commonProps}
+      {...buttonProps}
     >
       {children}
-    </Component>
+    </motion.button>
   )
 }
 

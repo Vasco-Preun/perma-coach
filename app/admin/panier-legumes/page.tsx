@@ -16,7 +16,7 @@ export default function AdminPanierLegumesPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
-  const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_PANIER_ADMIN_PASSWORD || 'panier123'
+  const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
 
   useEffect(() => {
     const savedAuth = localStorage.getItem('panier_admin_authenticated')
@@ -63,9 +63,13 @@ export default function AdminPanierLegumesPage() {
     setSaving(true)
     setMessage(null)
     try {
+      const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
       const response = await fetch('/api/legumes', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${ADMIN_PASSWORD}`
+        },
         body: JSON.stringify(legumes),
       })
       if (response.ok) {
@@ -90,7 +94,7 @@ export default function AdminPanierLegumesPage() {
       <>
         <Header />
         <main className="pt-20 min-h-screen bg-gradient-to-br from-green-50 via-white to-earth-50">
-          <Section padding="xl" background="transparent">
+          <Section padding="xl" background="white">
             <div className="container-custom max-w-md mx-auto">
               <GlassCard className="bg-white/95 backdrop-blur-sm border-green-200/50 shadow-2xl">
                 <div className="text-center mb-8">
@@ -155,7 +159,7 @@ export default function AdminPanierLegumesPage() {
       <>
         <Header />
         <main className="pt-20 min-h-screen bg-gradient-to-br from-green-50 via-white to-earth-50">
-          <Section padding="xl" background="transparent">
+          <Section padding="xl" background="white">
             <div className="container-custom text-center">
               <p className="text-lg text-[#1a1a1a]/70">Chargement...</p>
             </div>
@@ -171,7 +175,7 @@ export default function AdminPanierLegumesPage() {
       <Header />
       <main className="pt-20 min-h-screen bg-gradient-to-br from-green-50 via-white to-earth-50">
         {/* Header Admin */}
-        <Section padding="lg" background="transparent" className="border-b border-green-200/50">
+        <Section padding="lg" background="white" className="border-b border-green-200/50">
           <div className="container-custom max-w-6xl">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
@@ -212,7 +216,7 @@ export default function AdminPanierLegumesPage() {
         </Section>
 
         {/* Liste des légumes par catégorie */}
-        <Section padding="xl" background="transparent">
+        <Section padding="xl" background="white">
           <div className="container-custom max-w-6xl">
             <div className="space-y-8">
               {categories.map((category) => {
@@ -240,24 +244,39 @@ export default function AdminPanierLegumesPage() {
                           <button
                             key={legume.id}
                             onClick={() => toggleLegume(legume.id)}
-                            className={`group flex items-center justify-between p-4 rounded-2xl border-2 transition-all duration-200 ${
+                            className={`group flex flex-col p-4 rounded-2xl border-2 transition-all duration-200 text-left ${
                               legume.enabled
                                 ? 'bg-green-50 border-green-500 shadow-md'
                                 : 'bg-white border-earth-200 hover:border-earth-300'
                             }`}
                           >
-                            <span className={`font-medium text-base ${
-                              legume.enabled ? 'text-green-800' : 'text-[#1a1a1a]/60'
-                            }`}>
-                              {legume.name}
-                            </span>
-                            <div className={`flex items-center justify-center w-16 h-9 rounded-xl font-bold text-sm transition-all ${
-                              legume.enabled
-                                ? 'bg-green-600 text-white shadow-md'
-                                : 'bg-earth-100 text-earth-600'
-                            }`}>
-                              {legume.enabled ? 'ON' : 'OFF'}
+                            <div className="flex items-start justify-between mb-2">
+                              <span className={`font-medium text-base flex-1 ${
+                                legume.enabled ? 'text-green-800' : 'text-[#1a1a1a]/60'
+                              }`}>
+                                {legume.name}
+                              </span>
+                              <div className={`flex items-center justify-center w-16 h-9 rounded-xl font-bold text-sm transition-all flex-shrink-0 ml-3 ${
+                                legume.enabled
+                                  ? 'bg-green-600 text-white shadow-md'
+                                  : 'bg-earth-100 text-earth-600'
+                              }`}>
+                                {legume.enabled ? 'ON' : 'OFF'}
+                              </div>
                             </div>
+                            {legume.price && (
+                              <div className="text-sm text-[#1a1a1a]/70">
+                                <span className="font-semibold text-green-700">{legume.price.toFixed(2)} €</span>
+                                {legume.unit && (
+                                  <span className="ml-1">/ {legume.unit}</span>
+                                )}
+                                {legume.isLot && legume.lotDescription && (
+                                  <span className="block text-xs mt-1 text-[#1a1a1a]/60">
+                                    {legume.lotDescription}
+                                  </span>
+                                )}
+                              </div>
+                            )}
                           </button>
                         ))}
                       </div>

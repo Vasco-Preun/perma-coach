@@ -32,6 +32,8 @@ export interface Legume {
   category?: string
   price?: number
   unit?: string
+  isLot?: boolean
+  lotDescription?: string
 }
 
 // Fonctions pour lire/écrire les données JSON

@@ -1,0 +1,129 @@
+[
+  {
+    "id": "1",
+    "src": "/images/gallery/bananier2.jpg",
+    "alt": "Bananier dans la serre",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "2",
+    "src": "/images/gallery/BETTERAVE POIREAUX.jpg",
+    "alt": "Betteraves et poireaux",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "3",
+    "src": "/images/gallery/betterave2.jpg",
+    "alt": "Betterave en croissance",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "4",
+    "src": "/images/gallery/cocc rarrotte poireau2.jpg",
+    "alt": "Carottes et poireaux",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "5",
+    "src": "/images/gallery/COURGETTE MAIS.jpg",
+    "alt": "Courgettes et maïs",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "6",
+    "src": "/images/gallery/epinard salade matin .jpg",
+    "alt": "Épinards et salade du matin",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "7",
+    "src": "/images/gallery/IMG_20250611_151539.jpg",
+    "alt": "Jardin permaculture",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "8",
+    "src": "/images/gallery/limace sur salade matin .jpg",
+    "alt": "Limace sur salade",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "9",
+    "src": "/images/gallery/mandala matin 4.jpg",
+    "alt": "Mandala du matin",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "10",
+    "src": "/images/gallery/PANIER RECOLTE.jpg",
+    "alt": "Panier de récolte",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "11",
+    "src": "/images/gallery/PERMACOACH10.JPG",
+    "alt": "Permaculture - Écosystème",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "12",
+    "src": "/images/gallery/PERMACOACH14.JPG",
+    "alt": "Permaculture - Jardin",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "13",
+    "src": "/images/gallery/PERMACOACH15.JPG",
+    "alt": "Permaculture - Culture",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "14",
+    "src": "/images/gallery/PERMACOACH19.JPG",
+    "alt": "Permaculture - Récolte",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "15",
+    "src": "/images/gallery/PERMACOACH34.JPG",
+    "alt": "Permaculture - Écosystème vivant",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "16",
+    "src": "/images/gallery/POTIMARRON.jpg",
+    "alt": "Potimarron en croissance",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "17",
+    "src": "/images/gallery/serre.jpg",
+    "alt": "Serre permaculture",
+    "width": 800,
+    "height": 600
+  },
+  {
+    "id": "18",
+    "src": "/images/gallery/tomate4.jpg",
+    "alt": "Tomates en croissance",
+    "width": 800,
+    "height": 600
+  }
+]
+

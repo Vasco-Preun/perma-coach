@@ -1,0 +1,57 @@
+[
+  {
+    "id": "1",
+    "type": "formation",
+    "title": "Formation plantation arbre fruitier",
+    "startDate": "2026-02-13",
+    "endDate": "2026-02-14"
+  },
+  {
+    "id": "2",
+    "type": "chantier",
+    "title": "Chantier plantation arbre fruitier",
+    "startDate": "2026-02-21",
+    "endDate": "2026-02-22"
+  },
+  {
+    "id": "3",
+    "type": "chantier",
+    "title": "Chantier plantation arbre fruitier",
+    "startDate": "2026-03-08"
+  },
+  {
+    "id": "4",
+    "type": "formation",
+    "title": "Formation initiation permaculture – créer son potager",
+    "startDate": "2026-03-18",
+    "endDate": "2026-03-22"
+  },
+  {
+    "id": "5",
+    "type": "formation",
+    "title": "Formation initiation permaculture – approfondie",
+    "startDate": "2026-04-16",
+    "endDate": "2026-04-19"
+  },
+  {
+    "id": "6",
+    "type": "formation",
+    "title": "Formation initiation permaculture",
+    "startDate": "2026-05-01",
+    "endDate": "2026-05-02"
+  },
+  {
+    "id": "7",
+    "type": "formation",
+    "title": "Formation initiation permaculture – approfondie",
+    "startDate": "2026-05-12",
+    "endDate": "2026-05-15"
+  },
+  {
+    "id": "8",
+    "type": "formation",
+    "title": "Formation initiation permaculture",
+    "startDate": "2026-06-06",
+    "endDate": "2026-06-07"
+  }
+]
