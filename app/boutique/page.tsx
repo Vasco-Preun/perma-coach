@@ -533,14 +533,14 @@ export default function BoutiquePage() {
         </AnimatePresence>
 
         {/* Onglets de navigation */}
-        <Section padding="lg" background="white" className="sticky top-20 z-40 border-b border-green-200/50">
+        <Section padding="sm" background="white" className="sticky top-20 z-40 border-b border-green-200/50 py-3 md:py-4">
           <div className="container-custom max-w-7xl">
-            <div className="flex gap-2 md:gap-4 justify-center">
+            <div className="flex gap-2 md:gap-3 justify-center">
               {(['legumes', 'graines', 'plans'] as ProductCategory[]).map((tab) => (
                 <motion.button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`relative px-6 md:px-8 py-3 md:py-4 rounded-2xl font-semibold text-base md:text-lg transition-all duration-200 ${
+                  className={`relative px-4 md:px-6 py-2 md:py-2.5 rounded-xl font-semibold text-sm md:text-base transition-all duration-200 ${
                     activeTab === tab
                       ? 'bg-green-700 text-white shadow-lg'
                       : 'bg-green-50 text-green-700 hover:bg-green-100'
@@ -645,7 +645,7 @@ export default function BoutiquePage() {
                     </div>
                   </div>
                   ) : (
-                    <div className="grid md:grid-cols-2 gap-6 text-center md:text-left">
+                    <div className="grid md:grid-cols-3 gap-6 text-center md:text-left">
                       <div className="flex flex-col md:flex-row items-center md:items-start gap-3">
                         <div className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center flex-shrink-0">
                           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -656,6 +656,19 @@ export default function BoutiquePage() {
                           <p className="font-semibold text-[#1a1a1a] mb-1">Livraison</p>
                           <p className="text-sm text-[#1a1a1a]/70">Dans toute la France</p>
                           <p className="text-xs text-[#1a1a1a]/60 mt-1">{GRAINE_DELIVERY_COST}€ par paquet de graines</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col md:flex-row items-center md:items-start gap-3">
+                        <div className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center flex-shrink-0">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-[#1a1a1a] mb-1">Récupération</p>
+                          <p className="text-sm text-[#1a1a1a]/70">À la ferme</p>
+                          <p className="text-xs text-[#1a1a1a]/60 mt-1">{FARM_ADDRESS} (gratuit)</p>
                         </div>
                       </div>
                       <div className="flex flex-col md:flex-row items-center md:items-start gap-3">

@@ -17,13 +17,14 @@ export default function AdminPage() {
 
   const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
 
-  useEffect(() => {
-    const savedAuth = localStorage.getItem('admin_authenticated')
-    if (savedAuth === 'true') {
-      setIsAuthenticated(true)
-      loadEvents()
-    }
-  }, [])
+  // Ne pas vérifier automatiquement le localStorage pour forcer la demande du mot de passe
+  // useEffect(() => {
+  //   const savedAuth = localStorage.getItem('admin_authenticated')
+  //   if (savedAuth === 'true') {
+  //     setIsAuthenticated(true)
+  //     loadEvents()
+  //   }
+  // }, [])
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
