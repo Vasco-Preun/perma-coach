@@ -10,7 +10,7 @@ import Button from '@/components/ui/Button'
 import ScrollReveal from '@/components/ScrollReveal'
 import GoogleMap from '@/components/GoogleMap'
 import GlassCard from '@/components/GlassCard'
-import type { Legume, Graine, Plan, Product } from '@/lib/data'
+import type { Legume, Graine, Plan, Product, ProductType } from '@/lib/data'
 
 type ProductCategory = 'legumes' | 'graines' | 'plans'
 
@@ -142,13 +142,13 @@ export default function BoutiquePage() {
     localStorage.setItem('panier_boutique', JSON.stringify(newCart))
   }
 
-  const removeFromCart = (id: string, type: ProductCategory) => {
+  const removeFromCart = (id: string, type: ProductType) => {
     const newCart = cart.filter(item => !(item.id === id && item.type === type))
     setCart(newCart)
     localStorage.setItem('panier_boutique', JSON.stringify(newCart))
   }
 
-  const updateQuantity = (id: string, type: ProductCategory, quantity: number) => {
+  const updateQuantity = (id: string, type: ProductType, quantity: number) => {
     let newCart
     if (quantity <= 0) {
       newCart = cart.filter(item => !(item.id === id && item.type === type))
@@ -243,7 +243,7 @@ export default function BoutiquePage() {
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => updateQuantity(product.id, product.type as ProductCategory, cartItem.quantity - 1)}
+                      onClick={() => updateQuantity(product.id, product.type, cartItem.quantity - 1)}
                       className="w-10 h-10 rounded-xl bg-white text-green-700 flex items-center justify-center hover:bg-green-100 transition-colors font-bold text-lg shadow-sm"
                     >
                       −
@@ -254,7 +254,7 @@ export default function BoutiquePage() {
                     <motion.button
                       whileHover={{ scale: 1.1 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={() => updateQuantity(product.id, product.type as ProductCategory, cartItem.quantity + 1)}
+                      onClick={() => updateQuantity(product.id, product.type, cartItem.quantity + 1)}
                       className="w-10 h-10 rounded-xl bg-white text-green-700 flex items-center justify-center hover:bg-green-100 transition-colors font-bold text-lg shadow-sm"
                     >
                       +
@@ -263,7 +263,7 @@ export default function BoutiquePage() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    onClick={() => removeFromCart(product.id, product.type as ProductCategory)}
+                    onClick={() => removeFromCart(product.id, product.type)}
                     className="w-full text-sm text-red-600 hover:text-red-700 font-medium py-2 transition-colors"
                   >
                     Retirer du panier

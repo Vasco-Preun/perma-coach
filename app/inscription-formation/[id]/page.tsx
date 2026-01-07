@@ -10,6 +10,8 @@ import Button from '@/components/ui/Button'
 import ScrollReveal from '@/components/ScrollReveal'
 import type { Event } from '@/lib/data'
 
+const MAX_PLACES = 20
+
 export default function InscriptionFormationPage() {
   const params = useParams()
   const eventId = params.id as string
