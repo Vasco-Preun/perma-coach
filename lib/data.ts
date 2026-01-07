@@ -36,6 +36,30 @@ export interface Legume {
   lotDescription?: string
 }
 
+// Type générique pour les produits de la boutique
+export type ProductType = 'legume' | 'graine' | 'plan'
+
+export interface Product {
+  id: string
+  name: string
+  enabled: boolean
+  type: ProductType
+  category?: string
+  price?: number
+  unit?: string
+  isLot?: boolean
+  lotDescription?: string
+}
+
+// Types spécifiques pour compatibilité
+export interface Graine extends Omit<Product, 'type'> {
+  type: 'graine'
+}
+
+export interface Plan extends Omit<Product, 'type'> {
+  type: 'plan'
+}
+
 // Fonctions pour lire/écrire les données via KV (production) ou JSON (local)
 import { getKV, setKV } from './kv'
 
@@ -134,4 +158,54 @@ export async function saveLegumes(legumes: Legume[]): Promise<void> {
 export async function getEnabledLegumes(): Promise<Legume[]> {
   const legumes = await getLegumes()
   return legumes.filter(legume => legume.enabled)
+}
+
+// Fonctions pour les graines
+export async function getGraines(): Promise<Graine[]> {
+  const defaultGraines: Graine[] = [
+    { id: 'tomate-cerise', name: 'Tomate cerise', enabled: true, type: 'graine', category: 'Solanacées', price: 2.5, unit: 'sachet' },
+    { id: 'basilic', name: 'Basilic', enabled: true, type: 'graine', category: 'Aromatiques', price: 2.0, unit: 'sachet' },
+    { id: 'salade', name: 'Salade', enabled: true, type: 'graine', category: 'Légumes feuilles', price: 2.0, unit: 'sachet' },
+  ]
+  
+  const data = await readData('graines', defaultGraines)
+  if (!data || data.length === 0) {
+    await writeData('graines', defaultGraines)
+    return defaultGraines
+  }
+  return data
+}
+
+export async function saveGraines(graines: Graine[]): Promise<void> {
+  await writeData('graines', graines)
+}
+
+export async function getEnabledGraines(): Promise<Graine[]> {
+  const graines = await getGraines()
+  return graines.filter(graine => graine.enabled)
+}
+
+// Fonctions pour les plans
+export async function getPlans(): Promise<Plan[]> {
+  const defaultPlans: Plan[] = [
+    { id: 'tomate-plan', name: 'Plan de tomate', enabled: true, type: 'plan', category: 'Solanacées', price: 3.0, unit: 'pièce' },
+    { id: 'courgette-plan', name: 'Plan de courgette', enabled: true, type: 'plan', category: 'Cucurbitacées', price: 3.0, unit: 'pièce' },
+    { id: 'aubergine-plan', name: 'Plan d\'aubergine', enabled: true, type: 'plan', category: 'Solanacées', price: 3.5, unit: 'pièce' },
+  ]
+  
+  const data = await readData('plans', defaultPlans)
+  if (!data || data.length === 0) {
+    await writeData('plans', defaultPlans)
+    return defaultPlans
+  }
+  return data
+}
+
+export async function savePlans(plans: Plan[]): Promise<void> {
+  await writeData('plans', plans)
+}
+
+export async function getEnabledPlans(): Promise<Plan[]> {
+  const plans = await getPlans()
+  return plans.filter(plan => plan.enabled)
 }

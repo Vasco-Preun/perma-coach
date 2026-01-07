@@ -10,7 +10,7 @@ const navItems = [
   { href: '/notre-histoire', label: 'Notre histoire' },
   { href: '/chantiers-participatifs', label: 'Chantiers' },
   { href: '/pebi-formations', label: 'PEBI / Formations' },
-  { href: '/panier-legumes', label: 'Panier légumes' },
+  { href: '/boutique', label: 'Boutique' },
 ]
 
 export default function Header() {
@@ -29,8 +29,8 @@ export default function Header() {
   const isNotreHistoire = pathname === '/notre-histoire'
   const isHome = pathname === '/'
   const isPebi = pathname === '/pebi-formations'
-  const isPanierLegumes = pathname === '/panier-legumes'
-  const isHeroVisible = (isNotreHistoire || isHome || isPebi || isPanierLegumes) && !isScrolled
+  const isBoutique = pathname === '/boutique'
+  const isHeroVisible = (isNotreHistoire || isHome || isPebi || isBoutique) && !isScrolled
   
   return (
     <header

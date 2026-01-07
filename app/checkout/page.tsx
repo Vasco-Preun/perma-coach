@@ -7,9 +7,9 @@ import Section from '@/components/ui/Section'
 import Button from '@/components/ui/Button'
 import ScrollReveal from '@/components/ScrollReveal'
 import GlassCard from '@/components/GlassCard'
-import type { Legume } from '@/lib/data'
+import type { Product } from '@/lib/data'
 
-interface CartItem extends Legume {
+interface CartItem extends Product {
   quantity: number
 }
 
@@ -26,7 +26,7 @@ export default function CheckoutPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
   useEffect(() => {
-    const savedCart = localStorage.getItem('panier_legumes')
+    const savedCart = localStorage.getItem('panier_boutique')
     if (savedCart) {
       try {
         setCart(JSON.parse(savedCart))
@@ -40,11 +40,20 @@ export default function CheckoutPage() {
   const DISCOUNT_THRESHOLD = 25
   const DISCOUNT_PERCENTAGE = 15
   const DELIVERY_LOCATION = 'Reims'
+  const FARM_ADDRESS = 'La Chapelle Lasson, 20 rue Saint Fiacre'
+  const GRAINE_DELIVERY_COST = 2.90
 
   const getSubtotal = () => {
     return cart.reduce((total, item) => {
       const price = item.price || 0
       return total + (price * item.quantity)
+    }, 0)
+  }
+
+  const getGraineDeliveryCost = () => {
+    const grainesInCart = cart.filter(item => item.type === 'graine')
+    return grainesInCart.reduce((total, item) => {
+      return total + (GRAINE_DELIVERY_COST * item.quantity)
     }, 0)
   }
 
@@ -59,7 +68,8 @@ export default function CheckoutPage() {
   const getTotal = () => {
     const subtotal = getSubtotal()
     const discount = getDiscount()
-    return subtotal - discount
+    const graineDelivery = getGraineDeliveryCost()
+    return subtotal - discount + graineDelivery
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -111,7 +121,7 @@ export default function CheckoutPage() {
             type: 'success', 
             text: 'Commande enregistrée ! Nous vous contacterons bientôt pour finaliser le paiement et convenir d\'un rendez-vous de récupération.' 
           })
-          localStorage.removeItem('panier_legumes')
+          localStorage.removeItem('panier_boutique')
           setCart([])
         }
       } else {
@@ -119,7 +129,7 @@ export default function CheckoutPage() {
           type: 'success', 
           text: 'Commande enregistrée ! Nous vous contacterons bientôt pour finaliser le paiement et convenir d\'un rendez-vous de récupération.' 
         })
-        localStorage.removeItem('panier_legumes')
+        localStorage.removeItem('panier_boutique')
         setCart([])
       }
     } catch (error) {
@@ -149,7 +159,7 @@ export default function CheckoutPage() {
               </p>
               <Button
                 as="a"
-                href="/panier-legumes"
+                href="/boutique"
                 size="lg"
                 className="bg-green-700 hover:bg-green-800 text-white shadow-2xl"
               >
@@ -189,14 +199,24 @@ export default function CheckoutPage() {
                     <h2 className="text-2xl font-serif text-[#1a1a1a] mb-4">
                       Informations de récupération
                     </h2>
-                    <div className="p-4 bg-green-50 border-l-4 border-green-500 rounded-r-2xl">
-                      <p className="text-sm text-green-800 font-medium flex items-start gap-2">
-                        <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Les légumes sont à récupérer à {DELIVERY_LOCATION}. Nous vous contacterons pour convenir d'un rendez-vous de récupération.</span>
-                      </p>
+                    <div className="p-4 bg-green-50 border-l-4 border-green-500 rounded-r-2xl space-y-2">
+                      {cart.some(item => item.type === 'legume' || item.type === 'plan') && (
+                        <p className="text-sm text-green-800 font-medium flex items-start gap-2">
+                          <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span>Légumes et plans : Livraison sur {DELIVERY_LOCATION} à partir de {MINIMUM_ORDER}€ ou récupération à la ferme ({FARM_ADDRESS}) - toute quantité.</span>
+                        </p>
+                      )}
+                      {cart.some(item => item.type === 'graine') && (
+                        <p className="text-sm text-blue-800 font-medium flex items-start gap-2">
+                          <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                          </svg>
+                          <span>Graines : Livraison dans toute la France ({GRAINE_DELIVERY_COST}€ par paquet).</span>
+                        </p>
+                      )}
                     </div>
                   </div>
                   
@@ -338,6 +358,16 @@ export default function CheckoutPage() {
                         </span>
                       </div>
                     )}
+                    {getGraineDeliveryCost() > 0 && (
+                      <div className="flex justify-between items-center bg-blue-50 rounded-xl p-3">
+                        <span className="text-base font-semibold text-blue-700">
+                          Livraison graines
+                        </span>
+                        <span className="text-lg font-bold text-blue-700">
+                          +{getGraineDeliveryCost().toFixed(2)} €
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between items-center pt-3 border-t border-green-200/50">
                       <span className="text-xl font-bold text-[#1a1a1a]">Total</span>
                       <span className="text-3xl font-bold text-green-700">
@@ -345,13 +375,23 @@ export default function CheckoutPage() {
                       </span>
                     </div>
                     <div className="pt-3 space-y-2">
-                      <div className="flex items-start gap-2 text-xs text-[#1a1a1a]/60">
-                        <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>Récupération à {DELIVERY_LOCATION}</span>
-                      </div>
+                      {cart.some(item => item.type === 'legume' || item.type === 'plan') && (
+                        <div className="flex items-start gap-2 text-xs text-[#1a1a1a]/60">
+                          <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          <span>Légumes/Plans : Livraison {DELIVERY_LOCATION} ou récupération à la ferme ({FARM_ADDRESS})</span>
+                        </div>
+                      )}
+                      {cart.some(item => item.type === 'graine') && (
+                        <div className="flex items-start gap-2 text-xs text-[#1a1a1a]/60">
+                          <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                          </svg>
+                          <span>Graines : Livraison France ({GRAINE_DELIVERY_COST}€/paquet)</span>
+                        </div>
+                      )}
                       <p className="text-xs text-[#1a1a1a]/60 leading-relaxed">
                         Le paiement sera finalisé lors de la récupération ou par virement bancaire.
                       </p>

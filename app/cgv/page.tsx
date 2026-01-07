@@ -116,7 +116,7 @@ export default function CGVPage() {
                 <section>
                   <h2 className="text-2xl md:text-3xl font-serif text-[#1a1a1a] mb-4 mt-8">Article 6 - Livraison</h2>
                   <p className="mb-4">
-                    <strong>Zone de livraison :</strong> Les produits sont à récupérer sur place à Reims (51100) et ses environs. Le lieu exact de récupération sera communiqué au Client après validation de la commande.
+                    <strong>Zone de livraison :</strong> Les produits sont à récupérer sur place à la ferme (La Chapelle Lasson, 20 rue Saint Fiacre) ou livrés sur Reims et ses environs. Le lieu exact de récupération sera communiqué au Client après validation de la commande.
                   </p>
                   <p className="mb-4">
                     <strong>Modalités de récupération :</strong> Le Client doit indiquer lors de la commande une date de récupération souhaitée. Le Vendeur confirmera cette date par courrier électronique ou téléphone dans les meilleurs délais.

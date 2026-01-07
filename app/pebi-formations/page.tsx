@@ -10,6 +10,7 @@ import ScrollReveal from '@/components/ScrollReveal'
 import ParallaxSection from '@/components/ParallaxSection'
 import Hero from '@/components/Hero'
 import VideoBackground from '@/components/VideoBackground'
+import GoogleMap from '@/components/GoogleMap'
 import { getSettings, getEvents } from '@/lib/data'
 
 export const metadata: Metadata = {
@@ -117,6 +118,22 @@ export default async function PebiFormationsPage() {
                         <p className="text-lg text-[#1a1a1a]/70 mb-3">
                           <strong className="text-green-700">Durée : 2 à 4 jours</strong>
                         </p>
+                        
+                        {/* Tarifs */}
+                        <div className="mb-4 p-4 bg-gradient-to-br from-green-100 to-green-50 rounded-2xl border border-green-200/50">
+                          <h4 className="text-lg font-semibold text-[#1a1a1a] mb-3">Tarifs</h4>
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-base text-[#1a1a1a]/80">Formation de 2 jours</span>
+                              <span className="text-xl font-bold text-green-700">200 €</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-base text-[#1a1a1a]/80">Formation de 4 jours</span>
+                              <span className="text-xl font-bold text-green-700">500 €</span>
+                            </div>
+                          </div>
+                        </div>
+                        
                         <p className="text-base text-[#1a1a1a]/70 mb-4">
                           Nos formations se déroulent en présentiel sur notre site, au cœur de notre écosystème en construction. 
                           Vous serez immergé dans un environnement réel où vous pourrez observer, toucher, expérimenter et apprendre 
@@ -273,6 +290,26 @@ export default async function PebiFormationsPage() {
                   </Button>
                 </ParallaxSection>
               </div>
+            </ScrollReveal>
+          </div>
+        </Section>
+
+        {/* Carte Google Maps */}
+        <Section padding="xl" background="white" snap className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-green-50/30 via-white to-earth-50/20" />
+          <div className="container-custom max-w-6xl relative z-10">
+            <ScrollReveal direction="up">
+              <div className="mb-8 text-center">
+                <h2 className="text-4xl md:text-5xl font-serif text-[#1a1a1a] mb-4 leading-tight">
+                  Lieu des formations
+                </h2>
+                <p className="text-lg text-[#1a1a1a]/70">
+                  La Chapelle Lasson, 20 rue Saint Fiacre
+                </p>
+              </div>
+              <GlassCard className="bg-white/95 backdrop-blur-sm border-green-200/50 p-0 overflow-hidden">
+                <GoogleMap address="La Chapelle Lasson, 20 rue Saint Fiacre" height="500px" />
+              </GlassCard>
             </ScrollReveal>
           </div>
         </Section>

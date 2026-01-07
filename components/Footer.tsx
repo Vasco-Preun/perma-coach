@@ -9,7 +9,7 @@ const footerLinks = {
     { href: '/notre-histoire', label: 'Notre histoire' },
     { href: '/chantiers-participatifs', label: 'Chantiers participatifs' },
     { href: '/pebi-formations', label: 'PEBI / Formations' },
-    { href: '/panier-legumes', label: 'Panier légumes' },
+    { href: '/boutique', label: 'Boutique' },
   ],
   legal: [
     { href: '/contact', label: 'Contact' },

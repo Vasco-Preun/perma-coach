@@ -35,7 +35,7 @@ export default function MentionsLegalesPage() {
                       <strong>Forme juridique :</strong> Exploitation agricole à responsabilité limitée (EARL)
                     </p>
                     <p>
-                      <strong>Siège social :</strong> 8 hectares, 51100 Reims, France
+                      <strong>Siège social :</strong> La Chapelle Lasson, 20 rue Saint Fiacre
                     </p>
                     <p>
                       <strong>Numéro SIRET :</strong> 123 456 789 00012 (exemple - à remplacer par le numéro réel)

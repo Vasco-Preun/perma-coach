@@ -45,7 +45,7 @@ export default function PolitiqueConfidentialitePage() {
                   <div className="bg-green-50 p-6 rounded-2xl border border-green-200/50 mb-4">
                     <p className="mb-2"><strong>Perma-coach</strong></p>
                     <p className="mb-2">EARL - Exploitation agricole à responsabilité limitée</p>
-                    <p className="mb-2">8 hectares, 51100 Reims, France</p>
+                    <p className="mb-2">La Chapelle Lasson, 20 rue Saint Fiacre</p>
                     <p className="mb-2">Email : <a href="mailto:contact@perma-coach.fr" className="text-green-700 hover:text-green-800 underline">contact@perma-coach.fr</a></p>
                   </div>
                 </section>

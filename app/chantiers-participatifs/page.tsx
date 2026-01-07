@@ -9,6 +9,7 @@ import Button from '@/components/ui/Button'
 import ScrollReveal from '@/components/ScrollReveal'
 import ParallaxSection from '@/components/ParallaxSection'
 import HeroSimple from '@/components/HeroSimple'
+import GoogleMap from '@/components/GoogleMap'
 import { getSettings } from '@/lib/data'
 
 export const metadata: Metadata = {
@@ -191,6 +192,26 @@ export default async function ChantiersParticipatifsPage() {
                   </div>
                 )}
               </div>
+            </ScrollReveal>
+          </div>
+        </Section>
+
+        {/* Carte Google Maps */}
+        <Section padding="xl" background="off-white" snap className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(42,115,73,0.05),transparent_50%)]" />
+          <div className="container-custom max-w-6xl relative z-10">
+            <ScrollReveal direction="up">
+              <div className="mb-8 text-center">
+                <h2 className="text-4xl md:text-5xl font-serif text-[#1a1a1a] mb-4 leading-tight">
+                  Lieu des chantiers
+                </h2>
+                <p className="text-lg text-[#1a1a1a]/70">
+                  La Chapelle Lasson, 20 rue Saint Fiacre
+                </p>
+              </div>
+              <GlassCard className="bg-white/95 backdrop-blur-sm border-green-200/50 p-0 overflow-hidden">
+                <GoogleMap address="La Chapelle Lasson, 20 rue Saint Fiacre" height="500px" />
+              </GlassCard>
             </ScrollReveal>
           </div>
         </Section>

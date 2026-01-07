@@ -8,6 +8,7 @@ import ParallaxSection from '@/components/ParallaxSection'
 import FloatingCards from '@/components/FloatingCards'
 import Hero from '@/components/Hero'
 import VideoBackground from '@/components/VideoBackground'
+import GoogleMap from '@/components/GoogleMap'
 import Image from 'next/image'
 import { getSettings, getEvents } from '@/lib/data'
 
@@ -521,6 +522,26 @@ export default async function Home() {
                   </Button>
                 </div>
               </div>
+            </ScrollReveal>
+          </div>
+        </Section>
+
+        {/* Carte Google Maps */}
+        <Section padding="xl" background="white" snap className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-green-50/30 via-white to-earth-50/20" />
+          <div className="container-custom max-w-6xl relative z-10">
+            <ScrollReveal direction="up">
+              <div className="mb-8 text-center">
+                <h2 className="text-4xl md:text-5xl font-serif text-[#1a1a1a] mb-4 leading-tight">
+                  Nous trouver
+                </h2>
+                <p className="text-lg text-[#1a1a1a]/70">
+                  La Chapelle Lasson, 20 rue Saint Fiacre
+                </p>
+              </div>
+              <GlassCard className="bg-white/95 backdrop-blur-sm border-green-200/50 p-0 overflow-hidden">
+                <GoogleMap address="La Chapelle Lasson, 20 rue Saint Fiacre" height="500px" />
+              </GlassCard>
             </ScrollReveal>
           </div>
         </Section>

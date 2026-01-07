@@ -181,12 +181,12 @@ export default function AdminPage() {
               <div className="flex items-center gap-4">
                 <Button
                   as="a"
-                  href="/admin/panier-legumes"
+                  href="/admin/boutique"
                   variant="outline"
                   size="lg"
                   className="border-green-700 text-green-700 hover:bg-green-50"
                 >
-                  Gérer les légumes
+                  Gérer la boutique
                 </Button>
                 <Button
                   onClick={saveEvents}
