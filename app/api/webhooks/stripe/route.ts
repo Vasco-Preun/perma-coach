@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getKV, setKV } from '@/lib/kv'
+import { sendOrderEmail } from '@/lib/email'
 
 const stripeBoutique = process.env.STRIPE_SECRET_KEY_BOUTIQUE
   ? new Stripe(process.env.STRIPE_SECRET_KEY_BOUTIQUE, {
@@ -112,7 +113,15 @@ async function handleWebhookEvent(
           await setKV('orders', orders)
           console.log(`Commande ${orderId} marquée comme payée (${accountType})`)
           
-          // TODO: Envoyer un email de confirmation
+          // Envoyer un email uniquement après confirmation du paiement
+          try {
+            await sendOrderEmail(orders[orderIndex])
+            console.log(`Email de commande envoyé pour ${orderId}`)
+          } catch (emailError) {
+            console.error('Erreur lors de l\'envoi de l\'email:', emailError)
+            // Ne pas faire échouer le webhook si l'email échoue
+            // La commande est déjà marquée comme payée
+          }
         }
       }
     }

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getKV, setKV } from '@/lib/kv'
-import { sendOrderEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,15 +20,8 @@ export async function POST(request: NextRequest) {
     // Sauvegarder
     await setKV('orders', orders)
     
-    // Envoyer un email de notification
-    try {
-      await sendOrderEmail(newOrder)
-      console.log('Email de commande envoyé avec succès')
-    } catch (emailError) {
-      console.error('Erreur lors de l\'envoi de l\'email:', emailError)
-      // Ne pas faire échouer la commande si l'email échoue
-      // La commande est déjà sauvegardée
-    }
+    // Note: L'email sera envoyé uniquement après confirmation du paiement via le webhook Stripe
+    // Cela garantit que Sébastien ne reçoit que les commandes payées
     
     return NextResponse.json({ success: true, orderId: newOrder.id })
   } catch (error) {
