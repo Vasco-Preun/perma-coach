@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     // Initialiser Stripe avec la bonne clé
     const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2024-11-20.acacia',
+      apiVersion: '2023-10-16',
     })
 
     // Préparer les items pour Stripe selon le type

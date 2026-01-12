@@ -4,13 +4,13 @@ import { getKV, setKV } from '@/lib/kv'
 
 const stripeBoutique = process.env.STRIPE_SECRET_KEY_BOUTIQUE
   ? new Stripe(process.env.STRIPE_SECRET_KEY_BOUTIQUE, {
-      apiVersion: '2024-11-20.acacia',
+      apiVersion: '2023-10-16',
     })
   : null
 
 const stripeFormations = process.env.STRIPE_SECRET_KEY_FORMATIONS
   ? new Stripe(process.env.STRIPE_SECRET_KEY_FORMATIONS, {
-      apiVersion: '2024-11-20.acacia',
+      apiVersion: '2023-10-16',
     })
   : null
 

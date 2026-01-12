@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
 
     // Initialiser Stripe
     const stripe = new Stripe(stripeSecretKey, {
-      apiVersion: '2024-11-20.acacia',
+      apiVersion: '2023-10-16',
     })
 
     // Récupérer la session Stripe
