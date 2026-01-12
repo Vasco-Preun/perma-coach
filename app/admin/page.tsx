@@ -78,15 +78,13 @@ export default function AdminPage() {
   }
 
   const addEvent = () => {
-    setEvents([
-      ...events,
-      {
-        id: Date.now().toString(),
-        type: 'formation',
-        title: '',
-        startDate: new Date().toISOString().split('T')[0],
-      },
-    ])
+    const newEvent: Event = {
+      id: Date.now().toString(),
+      type: 'formation',
+      title: '',
+      startDate: new Date().toISOString().split('T')[0],
+    }
+    setEvents((prevEvents) => [...prevEvents, newEvent])
   }
 
   const removeEvent = (id: string) => {
@@ -221,9 +219,8 @@ export default function AdminPage() {
               </h2>
               <Button
                 onClick={addEvent}
-                variant="outline"
                 size="md"
-                className="border-green-700 text-green-700 hover:bg-green-50"
+                className="bg-green-700 hover:bg-green-800 text-white"
               >
                 + Ajouter une formation
               </Button>

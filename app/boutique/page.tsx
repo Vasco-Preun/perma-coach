@@ -105,19 +105,29 @@ export default function BoutiquePage() {
   }
 
   const isMinimumReached = () => {
-    // Le minimum de 15€ ne s'applique qu'aux légumes et plans
+    // Pas de minimum pour passer commande - la validation se fera au checkout
+    // selon le mode de récupération choisi (livraison Reims = 15€ min, ferme = pas de minimum)
+    // Le panier doit juste contenir au moins un article
+    return cart.length > 0
+  }
+  
+  // Fonction pour afficher le message du minimum (informations seulement)
+  const getMinimumMessage = () => {
     const legumesAndPlans = cart.filter(item => item.type === 'legume' || item.type === 'plan')
     const subtotalLegumesPlans = legumesAndPlans.reduce((total, item) => {
       const price = item.price || 0
       return total + (price * item.quantity)
     }, 0)
     
-    // Si le panier contient uniquement des graines, pas de minimum
     if (legumesAndPlans.length === 0) {
-      return true
+      return null // Pas de message si seulement des graines
     }
     
-    return subtotalLegumesPlans >= MINIMUM_ORDER
+    if (subtotalLegumesPlans >= MINIMUM_ORDER) {
+      return `Minimum atteint (${MINIMUM_ORDER}€)`
+    } else {
+      return `Pour livraison Reims : ${(MINIMUM_ORDER - subtotalLegumesPlans).toFixed(2)}€ restants`
+    }
   }
 
   const getLegumesAndPlansSubtotal = () => {
@@ -480,50 +490,30 @@ export default function BoutiquePage() {
                       <div className="h-3 w-px bg-green-200/50"></div>
                           </>
                         )}
-                      <div className={`flex items-center gap-1.5 ${isMinimumReached() ? 'text-green-600' : 'text-red-600'}`}>
-                        {isMinimumReached() ? (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        ) : (
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                          </svg>
-                        )}
-                        <span className={`font-semibold ${isMinimumReached() ? '' : 'drop-shadow-sm'}`}>
-                            {cart.some(item => item.type === 'legume' || item.type === 'plan') 
-                              ? (isMinimumReached() 
-                            ? `Minimum atteint (${MINIMUM_ORDER}€)` 
-                                  : `Minimum : ${(MINIMUM_ORDER - getLegumesAndPlansSubtotal()).toFixed(2)}€ restants`)
-                              : 'Commande valide'}
+                      <div className="flex items-center gap-1.5 text-green-600">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="font-semibold">
+                            {(() => {
+                              const message = getMinimumMessage()
+                              if (message) return message
+                              return 'Commande valide'
+                            })()}
                         </span>
-                        </div>
+                      </div>
                     </div>
                   </div>
                   
                   <div className="w-full lg:w-auto">
-                    {isMinimumReached() ? (
-                      <Button
-                        as="a"
-                        href="/checkout"
-                        size="lg"
-                        className="w-full lg:w-auto bg-green-700 hover:bg-green-800 text-white shadow-xl text-lg px-8 py-4"
-                      >
-                        Passer la commande
-                      </Button>
-                    ) : (
-                      <Button
-                        as="a"
-                        href="#"
-                        size="lg"
-                        onClick={(e) => {
-                          e.preventDefault()
-                        }}
-                        className="w-full lg:w-auto bg-gray-300 text-gray-500 cursor-not-allowed shadow-xl text-lg px-8 py-4 opacity-60"
-                      >
-                        Ajoutez {(MINIMUM_ORDER - getTotal()).toFixed(2)}€
-                      </Button>
-                    )}
+                    <Button
+                      as="a"
+                      href="/checkout"
+                      size="lg"
+                      className="w-full lg:w-auto bg-green-700 hover:bg-green-800 text-white shadow-xl text-lg px-8 py-4"
+                    >
+                      Passer la commande
+                    </Button>
                   </div>
                 </div>
               </div>

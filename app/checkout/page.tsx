@@ -20,10 +20,11 @@ export default function CheckoutPage() {
     email: '',
     phone: '',
     pickupDate: '',
+    pickupType: 'farm' as 'farm' | 'delivery', // 'farm' = récupération à la ferme, 'delivery' = livraison à Reims
     notes: '',
   })
   const [submitting, setSubmitting] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info', text: string } | null>(null)
 
   useEffect(() => {
     const savedCart = localStorage.getItem('panier_boutique')
@@ -35,6 +36,17 @@ export default function CheckoutPage() {
       }
     }
   }, [])
+
+  // Forcer la récupération à la ferme si la livraison à Reims n'est plus possible
+  useEffect(() => {
+    const legumesPlansSubtotal = cart
+      .filter(item => item.type === 'legume' || item.type === 'plan')
+      .reduce((total, item) => total + ((item.price || 0) * item.quantity), 0)
+    
+    if (formData.pickupType === 'delivery' && legumesPlansSubtotal < MINIMUM_ORDER) {
+      setFormData(prev => ({ ...prev, pickupType: 'farm' }))
+    }
+  }, [cart])
 
   const MINIMUM_ORDER = 15
   const DISCOUNT_THRESHOLD = 25
@@ -72,14 +84,42 @@ export default function CheckoutPage() {
     return subtotal - discount + graineDelivery
   }
 
+  // Calculer le sous-total des légumes et plans uniquement (pour la validation livraison Reims)
+  const getLegumesAndPlansSubtotal = () => {
+    return cart
+      .filter(item => item.type === 'legume' || item.type === 'plan')
+      .reduce((total, item) => {
+        const price = item.price || 0
+        return total + (price * item.quantity)
+      }, 0)
+  }
+
+  // Vérifier si la livraison à Reims est possible (minimum 15€ pour légumes/plans)
+  const canDeliverToReims = () => {
+    const legumesPlansSubtotal = getLegumesAndPlansSubtotal()
+    return legumesPlansSubtotal >= MINIMUM_ORDER
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
     setMessage(null)
 
+    // Forcer la récupération à la ferme si la livraison à Reims n'est pas possible
+    let finalPickupType = formData.pickupType
+    if (formData.pickupType === 'delivery' && !canDeliverToReims()) {
+      finalPickupType = 'farm'
+      setFormData(prev => ({ ...prev, pickupType: 'farm' }))
+      setMessage({
+        type: 'info',
+        text: `La livraison à ${DELIVERY_LOCATION} nécessite un minimum de ${MINIMUM_ORDER}€ pour les légumes et plans. Votre commande sera en récupération à la ferme.`
+      })
+    }
+
     try {
       const order = {
         ...formData,
+        pickupType: finalPickupType, // Utiliser le type final (peut avoir été forcé à 'farm')
         items: cart,
         subtotal: getSubtotal(),
         discount: getDiscount(),
@@ -99,35 +139,56 @@ export default function CheckoutPage() {
 
       const orderData = await orderResponse.json()
 
-      // Initier le paiement
-      const paymentResponse = await fetch('/api/payment/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderId: orderData.orderId,
-          amount: getTotal(),
-          subtotal: getSubtotal(),
-          discount: getDiscount(),
-          items: cart,
-        }),
-      })
+      // Vérifier si le paiement en ligne est possible selon le mode de récupération
+      const isDeliveryToReims = finalPickupType === 'delivery'
+      const canPayOnline = !isDeliveryToReims || getTotal() >= MINIMUM_ORDER
 
-      if (paymentResponse.ok) {
-        const paymentData = await paymentResponse.json()
-        if (paymentData.paymentUrl) {
-          window.location.href = paymentData.paymentUrl
+      if (canPayOnline) {
+        // Initier le paiement en ligne
+        const paymentResponse = await fetch('/api/payment/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            orderId: orderData.orderId,
+            amount: getTotal(),
+            subtotal: getSubtotal(),
+            discount: getDiscount(),
+            items: cart,
+            type: 'boutique', // Indiquer que c'est un paiement boutique
+          }),
+        })
+
+        if (paymentResponse.ok) {
+          const paymentData = await paymentResponse.json()
+          if (paymentData.paymentUrl) {
+            // Vider le panier seulement avant la redirection vers Stripe
+            localStorage.removeItem('panier_boutique')
+            // Rediriger vers Stripe
+            window.location.href = paymentData.paymentUrl
+            return // Ne pas continuer l'exécution après la redirection
+          } else {
+            // Pas de redirection Stripe, on garde le panier et on affiche un message
+            setMessage({ 
+              type: 'success', 
+              text: 'Commande enregistrée ! Nous vous contacterons bientôt pour finaliser le paiement et convenir d\'un rendez-vous de récupération.' 
+            })
+            // Ne pas vider le panier ici, l'utilisateur peut vouloir modifier sa commande
+          }
         } else {
+          // Erreur lors de la création du paiement
+          const errorData = await paymentResponse.json().catch(() => ({}))
+          console.error('Erreur paiement:', errorData)
           setMessage({ 
-            type: 'success', 
-            text: 'Commande enregistrée ! Nous vous contacterons bientôt pour finaliser le paiement et convenir d\'un rendez-vous de récupération.' 
+            type: 'error', 
+            text: errorData.error || errorData.message || 'Erreur lors de la création du paiement. Votre commande a été enregistrée, nous vous contacterons.' 
           })
-          localStorage.removeItem('panier_boutique')
-          setCart([])
+          // Ne pas vider le panier en cas d'erreur
         }
       } else {
+        // Livraison à Reims avec montant < 15€ : pas de paiement en ligne
         setMessage({ 
           type: 'success', 
-          text: 'Commande enregistrée ! Nous vous contacterons bientôt pour finaliser le paiement et convenir d\'un rendez-vous de récupération.' 
+          text: `Commande enregistrée ! Pour une livraison à ${DELIVERY_LOCATION}, le paiement en ligne est disponible à partir de ${MINIMUM_ORDER}€. Nous vous contacterons pour finaliser le paiement à la livraison.` 
         })
         localStorage.removeItem('panier_boutique')
         setCart([])
@@ -201,13 +262,30 @@ export default function CheckoutPage() {
                     </h2>
                     <div className="p-4 bg-green-50 border-l-4 border-green-500 rounded-r-2xl space-y-2">
                       {cart.some(item => item.type === 'legume' || item.type === 'plan') && (
-                        <p className="text-sm text-green-800 font-medium flex items-start gap-2">
-                          <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                          <span>Légumes et plans : Livraison sur {DELIVERY_LOCATION} à partir de {MINIMUM_ORDER}€ ou récupération à la ferme ({FARM_ADDRESS}) - toute quantité.</span>
-                        </p>
+                        <div className="space-y-2">
+                          <p className="text-sm text-green-800 font-medium flex items-start gap-2">
+                            <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span>Légumes et plans : Récupération à la ferme ({FARM_ADDRESS}) - toute quantité, paiement en ligne possible dès 1€.</span>
+                          </p>
+                          {canDeliverToReims() ? (
+                            <p className="text-sm text-green-800 font-medium flex items-start gap-2">
+                              <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                              </svg>
+                              <span>Livraison à {DELIVERY_LOCATION} disponible (minimum {MINIMUM_ORDER}€) - paiement en ligne à partir de {MINIMUM_ORDER}€.</span>
+                            </p>
+                          ) : (
+                            <p className="text-sm text-orange-800 font-medium flex items-start gap-2">
+                              <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                              </svg>
+                              <span>Livraison à {DELIVERY_LOCATION} : minimum {MINIMUM_ORDER}€ requis pour les légumes et plans. Actuellement : {getLegumesAndPlansSubtotal().toFixed(2)}€</span>
+                            </p>
+                          )}
+                        </div>
                       )}
                       {cart.some(item => item.type === 'graine') && (
                         <p className="text-sm text-blue-800 font-medium flex items-start gap-2">
@@ -224,7 +302,9 @@ export default function CheckoutPage() {
                     <div className={`mb-6 p-4 rounded-2xl ${
                       message.type === 'success' 
                         ? 'bg-green-50 text-green-800 border border-green-200' 
-                        : 'bg-red-50 text-red-800 border border-red-200'
+                        : message.type === 'error'
+                        ? 'bg-red-50 text-red-800 border border-red-200'
+                        : 'bg-blue-50 text-blue-800 border border-blue-200'
                     }`}>
                       {message.text}
                     </div>
@@ -278,8 +358,73 @@ export default function CheckoutPage() {
                     </div>
                     
                     <div>
+                      <label className="block text-sm font-semibold text-[#1a1a1a] mb-2">
+                        Mode de récupération *
+                      </label>
+                      <div className="grid md:grid-cols-2 gap-4 mb-4">
+                        <label className={`flex items-center p-4 border-2 rounded-2xl cursor-pointer transition-all ${
+                          formData.pickupType === 'farm'
+                            ? 'border-green-500 bg-green-50'
+                            : 'border-earth-200 hover:border-green-300'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="pickupType"
+                            value="farm"
+                            checked={formData.pickupType === 'farm'}
+                            onChange={(e) => setFormData({ ...formData, pickupType: e.target.value as 'farm' | 'delivery' })}
+                            className="sr-only"
+                          />
+                          <div className="flex-1">
+                            <div className="font-semibold text-[#1a1a1a] mb-1">Récupération à la ferme</div>
+                            <div className="text-sm text-[#1a1a1a]/70">{FARM_ADDRESS}</div>
+                            <div className="text-xs text-green-700 mt-1">Paiement en ligne possible dès 1€</div>
+                          </div>
+                        </label>
+                        <label className={`flex items-center p-4 border-2 rounded-2xl transition-all ${
+                          !canDeliverToReims()
+                            ? 'border-gray-300 bg-gray-100 cursor-not-allowed opacity-60'
+                            : formData.pickupType === 'delivery'
+                            ? 'border-green-500 bg-green-50 cursor-pointer'
+                            : 'border-earth-200 hover:border-green-300 cursor-pointer'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="pickupType"
+                            value="delivery"
+                            checked={formData.pickupType === 'delivery'}
+                            disabled={!canDeliverToReims()}
+                            onChange={(e) => {
+                              if (canDeliverToReims()) {
+                                setFormData({ ...formData, pickupType: e.target.value as 'farm' | 'delivery' })
+                              }
+                            }}
+                            className="sr-only"
+                          />
+                          <div className="flex-1">
+                            <div className="font-semibold text-[#1a1a1a] mb-1">
+                              Livraison à {DELIVERY_LOCATION}
+                              {!canDeliverToReims() && (
+                                <span className="text-xs text-red-600 ml-2">(Minimum {MINIMUM_ORDER}€ requis)</span>
+                              )}
+                            </div>
+                            <div className="text-sm text-[#1a1a1a]/70">
+                              {canDeliverToReims() 
+                                ? `À partir de ${MINIMUM_ORDER}€`
+                                : `Minimum ${MINIMUM_ORDER}€ pour les légumes et plans`
+                              }
+                            </div>
+                            {canDeliverToReims() && (
+                              <div className="text-xs text-orange-700 mt-1">Paiement en ligne à partir de {MINIMUM_ORDER}€</div>
+                            )}
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                    
+                    <div>
                       <label htmlFor="pickupDate" className="block text-sm font-semibold text-[#1a1a1a] mb-2">
-                        Date de récupération souhaitée *
+                        {formData.pickupType === 'farm' ? 'Date de récupération souhaitée' : 'Date de livraison souhaitée'} *
                       </label>
                       <input
                         type="date"
@@ -393,7 +538,11 @@ export default function CheckoutPage() {
                         </div>
                       )}
                       <p className="text-xs text-[#1a1a1a]/60 leading-relaxed">
-                        Le paiement sera finalisé lors de la récupération ou par virement bancaire.
+                        {formData.pickupType === 'delivery' && getTotal() < MINIMUM_ORDER ? (
+                          <>Paiement en ligne disponible à partir de {MINIMUM_ORDER}€. Pour cette commande, le paiement se fera à la livraison.</>
+                        ) : (
+                          <>Le paiement en ligne est disponible. Vous serez redirigé vers la page de paiement sécurisé après validation.</>
+                        )}
                       </p>
                     </div>
                   </div>

@@ -139,6 +139,7 @@ export default function InscriptionFormationPage() {
           amount: price,
           type: 'formation',
           eventId: eventId,
+          eventTitle: event?.title,
         }),
       })
 
