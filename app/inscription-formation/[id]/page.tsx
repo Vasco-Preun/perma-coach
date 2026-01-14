@@ -57,7 +57,7 @@ export default function InscriptionFormationPage() {
         if (foundEvent) {
           setEvent(foundEvent)
         } else {
-          console.warn('Formation non trouvée. ID cherché:', eventId, 'Événements disponibles:', events.map(e => ({ id: e.id, type: e.type, title: e.title })))
+          console.warn('Formation non trouvée. ID cherché:', eventId, 'Événements disponibles:', events.map((e: Event) => ({ id: e.id, type: e.type, title: e.title })))
         }
         
         if (placesResponse.ok) {
