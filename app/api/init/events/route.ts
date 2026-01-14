@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server'
 import { getEvents, saveEvents } from '@/lib/data'
 
+export async function GET() {
+  return await initEvents()
+}
+
 export async function POST() {
+  return await initEvents()
+}
+
+async function initEvents() {
   try {
     // Force l'initialisation des événements si nécessaire
     const events = await getEvents()

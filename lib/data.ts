@@ -108,14 +108,28 @@ export async function getEvents(): Promise<Event[]> {
     { id: '8', type: 'formation', title: 'Formation initiation permaculture', startDate: '2026-06-06', endDate: '2026-06-07' },
   ]
   
-  // Vérifier directement si les données existent dans KV
-  const rawData = await getKV('events')
-  if (rawData === null || rawData === undefined || (Array.isArray(rawData) && rawData.length === 0)) {
-    // Initialiser avec les données par défaut
-    await writeData('events', defaultEvents)
+  try {
+    // Vérifier directement si les données existent dans KV ou fichiers
+    const rawData = await getKV('events')
+    
+    // Si les données n'existent pas ou sont vides, initialiser avec les valeurs par défaut
+    if (!rawData || (Array.isArray(rawData) && rawData.length === 0)) {
+      console.log('Initialisation des événements avec les valeurs par défaut')
+      await setKV('events', defaultEvents)
+      return defaultEvents
+    }
+    
+    return rawData
+  } catch (error) {
+    console.error('Erreur lors de la récupération des événements, utilisation des valeurs par défaut:', error)
+    // En cas d'erreur (KV non configuré, etc.), retourner les valeurs par défaut
+    try {
+      await setKV('events', defaultEvents)
+    } catch (writeError) {
+      console.error('Erreur lors de l\'écriture des événements par défaut:', writeError)
+    }
     return defaultEvents
   }
-  return rawData
 }
 
 export async function saveEvents(events: Event[]): Promise<void> {
