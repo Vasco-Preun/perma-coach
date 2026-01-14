@@ -108,12 +108,14 @@ export async function getEvents(): Promise<Event[]> {
     { id: '8', type: 'formation', title: 'Formation initiation permaculture', startDate: '2026-06-06', endDate: '2026-06-07' },
   ]
   
-  const data = await readData('events', defaultEvents)
-  if (!data || data.length === 0) {
+  // Vérifier directement si les données existent dans KV
+  const rawData = await getKV('events')
+  if (rawData === null || rawData === undefined || (Array.isArray(rawData) && rawData.length === 0)) {
+    // Initialiser avec les données par défaut
     await writeData('events', defaultEvents)
     return defaultEvents
   }
-  return data
+  return rawData
 }
 
 export async function saveEvents(events: Event[]): Promise<void> {
