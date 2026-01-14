@@ -275,6 +275,25 @@ export default function AdminPage() {
                         />
                       </div>
                     </div>
+                    {event.type === 'formation' && (
+                      <div className="mt-4">
+                        <label className="block text-sm font-semibold text-[#1a1a1a] mb-2">
+                          Prix personnalisé (€) - Optionnel
+                        </label>
+                        <input
+                          type="number"
+                          value={event.price || ''}
+                          onChange={(e) => updateEvent(event.id, 'price', e.target.value ? parseFloat(e.target.value) : undefined)}
+                          placeholder="Laisser vide pour calcul automatique (2j=200€, 4j=500€)"
+                          min="0"
+                          step="0.01"
+                          className="w-full px-4 py-2.5 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a]"
+                        />
+                        <p className="mt-1 text-xs text-[#1a1a1a]/60">
+                          Si vide, le prix sera calculé automatiquement : 200€ pour 2 jours, 500€ pour 4 jours
+                        </p>
+                      </div>
+                    )}
                     {event.description && (
                       <div className="mt-4">
                         <label className="block text-sm font-semibold text-[#1a1a1a] mb-2">Description (optionnel)</label>

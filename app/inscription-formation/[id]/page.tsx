@@ -35,11 +35,29 @@ export default function InscriptionFormationPage() {
           fetch('/api/formations/places')
         ])
         
-        if (!eventsResponse.ok) throw new Error('Erreur de chargement')
+        if (!eventsResponse.ok) {
+          console.error('Erreur lors du chargement des événements:', eventsResponse.status, eventsResponse.statusText)
+          throw new Error('Erreur de chargement')
+        }
+        
         const events = await eventsResponse.json()
-        const foundEvent = events.find((e: Event) => e.id === eventId && e.type === 'formation')
+        console.log('Événements chargés:', events.length, 'recherche ID:', eventId)
+        
+        // Comparaison flexible des IDs (string ou number)
+        const foundEvent = events.find((e: Event) => {
+          const eId = String(e.id)
+          const searchId = String(eventId)
+          const matches = eId === searchId && e.type === 'formation'
+          if (matches) {
+            console.log('Formation trouvée:', e)
+          }
+          return matches
+        })
+        
         if (foundEvent) {
           setEvent(foundEvent)
+        } else {
+          console.warn('Formation non trouvée. ID cherché:', eventId, 'Événements disponibles:', events.map(e => ({ id: e.id, type: e.type, title: e.title })))
         }
         
         if (placesResponse.ok) {
@@ -66,8 +84,16 @@ export default function InscriptionFormationPage() {
     return diffDays
   }
 
-  const getFormationPrice = (start: string, end?: string): number | null => {
-    const duration = getDuration(start, end)
+  const getFormationPrice = (event: Event | null): number | null => {
+    if (!event) return null
+    
+    // Si un prix personnalisé est défini, l'utiliser
+    if (event.price !== undefined && event.price !== null) {
+      return event.price
+    }
+    
+    // Sinon, calculer automatiquement selon la durée
+    const duration = getDuration(event.startDate, event.endDate)
     if (duration === 2) return 200
     if (duration === 4) return 500
     return null
@@ -92,7 +118,7 @@ export default function InscriptionFormationPage() {
     return `${startDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} - ${endDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`
   }
 
-  const price = event ? getFormationPrice(event.startDate, event.endDate) : null
+  const price = getFormationPrice(event)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

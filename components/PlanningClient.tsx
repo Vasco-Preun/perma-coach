@@ -63,8 +63,14 @@ export default function PlanningClient({ events: initialEvents }: PlanningClient
     return diffDays
   }
 
-  const getFormationPrice = (start: string, end?: string): number | null => {
-    const duration = getDuration(start, end)
+  const getFormationPrice = (event: Event): number | null => {
+    // Si un prix personnalisé est défini, l'utiliser
+    if (event.price !== undefined && event.price !== null) {
+      return event.price
+    }
+    
+    // Sinon, calculer automatiquement selon la durée
+    const duration = getDuration(event.startDate, event.endDate)
     if (duration === 2) return 200
     if (duration === 4) return 500
     return null // Prix non défini pour d'autres durées
@@ -171,9 +177,9 @@ export default function PlanningClient({ events: initialEvents }: PlanningClient
                     <p className="text-lg font-medium text-[#1a1a1a] mb-1">
                       {formatDateRange(event.startDate, event.endDate)}
                     </p>
-                    {event.type === 'formation' && getFormationPrice(event.startDate, event.endDate) && (
+                    {event.type === 'formation' && getFormationPrice(event) && (
                       <p className="text-xl font-bold text-green-700">
-                        {getFormationPrice(event.startDate, event.endDate)} €
+                        {getFormationPrice(event)} €
                       </p>
                     )}
                     {event.type === 'formation' && availability && (

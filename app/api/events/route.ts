@@ -14,6 +14,10 @@ export async function GET() {
       )
     }
     
+    console.log(`[API /events] Retourne ${events.length} événements`)
+    const formations = events.filter((e: any) => e.type === 'formation')
+    console.log(`[API /events] ${formations.length} formations trouvées:`, formations.map((e: any) => ({ id: e.id, title: e.title })))
+    
     return NextResponse.json(events)
   } catch (error: any) {
     console.error('Erreur lors de la lecture des événements:', error)

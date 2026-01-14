@@ -15,6 +15,7 @@ export interface Event {
   startDate: string
   endDate?: string
   description?: string
+  price?: number // Prix personnalisé (optionnel, sinon calculé automatiquement selon la durée)
 }
 
 export interface GalleryImage {
