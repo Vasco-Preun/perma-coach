@@ -30,9 +30,10 @@ export default function InscriptionFormationPage() {
   useEffect(() => {
     const loadEvent = async () => {
       try {
+        // Forcer le rechargement sans cache
         const [eventsResponse, placesResponse] = await Promise.all([
-          fetch('/api/events'),
-          fetch('/api/formations/places')
+          fetch('/api/events', { cache: 'no-store', next: { revalidate: 0 } }),
+          fetch('/api/formations/places', { cache: 'no-store' })
         ])
         
         if (!eventsResponse.ok) {
@@ -41,23 +42,28 @@ export default function InscriptionFormationPage() {
         }
         
         const events = await eventsResponse.json()
-        console.log('Événements chargés:', events.length, 'recherche ID:', eventId)
+        console.log('Événements chargés:', events.length, 'recherche ID:', eventId, 'Type:', typeof eventId)
+        console.log('Tous les IDs disponibles:', events.map((e: Event) => ({ id: e.id, idType: typeof e.id, type: e.type, title: e.title })))
         
         // Comparaison flexible des IDs (string ou number)
         const foundEvent = events.find((e: Event) => {
-          const eId = String(e.id)
-          const searchId = String(eventId)
+          const eId = String(e.id).trim()
+          const searchId = String(eventId).trim()
           const matches = eId === searchId && e.type === 'formation'
           if (matches) {
-            console.log('Formation trouvée:', e)
+            console.log('✅ Formation trouvée:', e)
           }
           return matches
         })
         
         if (foundEvent) {
           setEvent(foundEvent)
+          console.log('✅ Événement défini dans le state:', foundEvent)
         } else {
-          console.warn('Formation non trouvée. ID cherché:', eventId, 'Événements disponibles:', events.map((e: Event) => ({ id: e.id, type: e.type, title: e.title })))
+          console.error('❌ Formation non trouvée!')
+          console.error('ID cherché:', eventId, 'Type:', typeof eventId)
+          console.error('Événements disponibles:', events.map((e: Event) => ({ id: e.id, idType: typeof e.id, type: e.type, title: e.title })))
+          console.error('Formations uniquement:', events.filter((e: Event) => e.type === 'formation').map((e: Event) => ({ id: e.id, title: e.title })))
         }
         
         if (placesResponse.ok) {
