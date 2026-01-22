@@ -6,10 +6,10 @@ export function verifyAdminAuth(request: Request): boolean {
     return false
   }
 
-  // Format attendu: "Bearer admin123" ou simplement le token
+  // Format attendu: "Bearer lesjardinsduclos26" ou simplement le token
   const token = authHeader.replace('Bearer ', '')
   // Utiliser ADMIN_PASSWORD (côté serveur uniquement) ou fallback sur NEXT_PUBLIC pour compatibilité
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'lesjardinsduclos26'
   
   return token === ADMIN_PASSWORD
 }

@@ -45,7 +45,7 @@ export default function AdminBoutiquePage() {
     lotDescription: ''
   })
 
-  const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
+  const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'lesjardinsduclos26'
 
   useEffect(() => {
     const savedAuth = localStorage.getItem('boutique_admin_authenticated')
@@ -254,7 +254,7 @@ export default function AdminBoutiquePage() {
     setSaving(true)
     setMessage(null)
     try {
-      const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
+      const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'lesjardinsduclos26'
       
       const [legumesRes, grainesRes, plansRes] = await Promise.all([
         fetch('/api/legumes', {

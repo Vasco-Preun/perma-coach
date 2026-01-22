@@ -15,7 +15,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
-  const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
+  const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'lesjardinsduclos26'
 
   // Ne pas vérifier automatiquement le localStorage pour forcer la demande du mot de passe
   // useEffect(() => {
@@ -55,7 +55,7 @@ export default function AdminPage() {
     setLoading(true)
     setMessage(null)
     try {
-      const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123'
+      const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'lesjardinsduclos26'
       const response = await fetch('/api/admin/events', {
         method: 'POST',
         headers: { 
