@@ -81,11 +81,14 @@ export default async function NotreHistoirePage() {
         <section className="relative overflow-hidden min-h-screen flex items-center pt-32 pb-0 px-4 sm:px-6 lg:px-8 bg-transparent snap-section -mb-32">
           <div className="absolute inset-0 z-0 overflow-hidden">
             <div className="relative w-full h-full">
-              <img
+              <Image
                 src="/PERMACOACH8.JPG"
-                alt=""
-                className="w-full h-full object-cover"
+                alt="Notre histoire - Permaculture"
+                fill
+                className="object-cover"
                 style={{ transform: 'translateY(-15%) scale(1.05)' }}
+                sizes="100vw"
+                priority
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent"></div>
               <div className="absolute inset-0 bg-black/40"></div>

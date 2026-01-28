@@ -46,7 +46,7 @@ export default function CheckoutPage() {
     if (formData.pickupType === 'delivery' && legumesPlansSubtotal < MINIMUM_ORDER) {
       setFormData(prev => ({ ...prev, pickupType: 'farm' }))
     }
-  }, [cart])
+  }, [cart, formData.pickupType])
 
   const MINIMUM_ORDER = 15
   const DISCOUNT_THRESHOLD = 25
