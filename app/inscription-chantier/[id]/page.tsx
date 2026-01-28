@@ -151,9 +151,14 @@ export default function InscriptionChantierPage() {
                 <h2 className="text-2xl md:text-3xl font-serif text-[#1a1a1a] mb-2">
                   {event.title}
                 </h2>
-                <p className="text-lg text-[#1a1a1a]/70">
+                <p className="text-lg text-[#1a1a1a]/70 mb-4">
                   {formatDateRange(event.startDate, event.endDate)}
                 </p>
+                {event.description && (
+                  <p className="text-base text-[#1a1a1a]/70 mb-4 leading-relaxed">
+                    {event.description}
+                  </p>
+                )}
               </div>
 
               <GlassCard className="bg-white/95 backdrop-blur-sm border-earth-200/50 shadow-xl">

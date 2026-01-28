@@ -1,7 +1,7 @@
 # Configuration Stripe - Deux comptes distincts
 
 Ce projet utilise deux comptes Stripe distincts :
-1. **Compte Boutique** : pour les produits (plans, graines, légumes)
+1. **Compte Boutique** : pour les produits (plants, graines, légumes)
 2. **Compte Formations** : pour les inscriptions aux formations
 
 ## Variables d'environnement requises
@@ -9,7 +9,7 @@ Ce projet utilise deux comptes Stripe distincts :
 Ajoutez ces variables dans votre fichier `.env.local` (développement) ou dans les variables d'environnement de Vercel (production) :
 
 ```env
-# Stripe - Compte Boutique (pour les produits : plans, graines, légumes)
+# Stripe - Compte Boutique (pour les produits : plants, graines, légumes)
 STRIPE_SECRET_KEY_BOUTIQUE=sk_test_VOTRE_CLE_ICI
 STRIPE_WEBHOOK_SECRET_BOUTIQUE=whsec_VOTRE_WEBHOOK_SECRET_ICI
 

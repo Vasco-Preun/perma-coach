@@ -10,14 +10,14 @@ import Button from '@/components/ui/Button'
 import ScrollReveal from '@/components/ScrollReveal'
 import type { Event } from '@/lib/data'
 
-const MAX_PLACES = 20
+const DEFAULT_MAX_PLACES = 20
 
 export default function InscriptionFormationPage() {
   const params = useParams()
   const eventId = params.id as string
   const [event, setEvent] = useState<Event | null>(null)
   const [loading, setLoading] = useState(true)
-  const [availability, setAvailability] = useState<{ reserved: number; available: number; isFull: boolean } | null>(null)
+  const [availability, setAvailability] = useState<{ reserved: number; available: number; isFull: boolean; maxPlaces: number } | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -26,6 +26,7 @@ export default function InscriptionFormationPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = useState<string>('')
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -132,11 +133,20 @@ export default function InscriptionFormationPage() {
     // Vérifier les places disponibles
     if (availability?.isFull) {
       setSubmitStatus('error')
+      setErrorMessage('Cette formation est complète. Impossible de procéder à l\'inscription.')
+      return
+    }
+    
+    // Vérifier que le prix est défini
+    if (!price || price <= 0) {
+      setSubmitStatus('error')
+      setErrorMessage('Le prix de la formation n\'est pas défini. Veuillez contacter l\'administrateur.')
       return
     }
     
     setIsSubmitting(true)
     setSubmitStatus('idle')
+    setErrorMessage('')
 
     try {
       // Créer une commande pour la formation
@@ -177,17 +187,29 @@ export default function InscriptionFormationPage() {
 
       if (paymentResponse.ok) {
         const paymentData = await paymentResponse.json()
+        console.log('Réponse paiement:', paymentData)
+        
         if (paymentData.paymentUrl) {
+          // Rediriger vers Stripe
+          console.log('Redirection vers Stripe:', paymentData.paymentUrl)
           window.location.href = paymentData.paymentUrl
+          return // Important : ne pas continuer l'exécution
         } else {
-          setSubmitStatus('success')
-          setFormData({ name: '', email: '', phone: '', notes: '' })
+          // Pas d'URL de paiement, afficher un message d'erreur
+          console.error('Pas d\'URL de paiement dans la réponse:', paymentData)
+          setErrorMessage(paymentData.message || 'Impossible de créer la session de paiement. Veuillez réessayer ou nous contacter.')
+          setSubmitStatus('error')
         }
       } else {
-        setSubmitStatus('success')
-        setFormData({ name: '', email: '', phone: '', notes: '' })
+        // Erreur lors de la création du paiement
+        const errorData = await paymentResponse.json().catch(() => ({}))
+        console.error('Erreur création paiement:', paymentResponse.status, errorData)
+        setErrorMessage(errorData.message || errorData.error || 'Une erreur est survenue lors de la création du paiement. Veuillez réessayer ou nous contacter.')
+        setSubmitStatus('error')
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Erreur lors de la soumission:', error)
+      setErrorMessage(error?.message || 'Une erreur inattendue est survenue. Veuillez réessayer ou nous contacter.')
       setSubmitStatus('error')
     } finally {
       setIsSubmitting(false)
@@ -251,9 +273,14 @@ export default function InscriptionFormationPage() {
                   <h2 className="text-2xl md:text-3xl font-serif text-[#1a1a1a] mb-2">
                     {event.title}
                   </h2>
-                  <p className="text-lg text-[#1a1a1a]/70 mb-6">
+                  <p className="text-lg text-[#1a1a1a]/70 mb-4">
                     {formatDateRange(event.startDate, event.endDate)}
                   </p>
+                  {event.description && (
+                    <p className="text-base text-[#1a1a1a]/70 mb-6 leading-relaxed">
+                      {event.description}
+                    </p>
+                  )}
                 </div>
 
                 <GlassCard className="bg-white/95 backdrop-blur-sm border-yellow-200/50 shadow-xl">
@@ -263,7 +290,7 @@ export default function InscriptionFormationPage() {
                         Cette formation est complète
                       </p>
                       <p className="text-base text-yellow-700">
-                        Les {MAX_PLACES} places ont été réservées. Contactez-nous pour être ajouté à la liste d'attente.
+                        Les {availability?.maxPlaces || DEFAULT_MAX_PLACES} places ont été réservées. Contactez-nous pour être ajouté à la liste d'attente.
                       </p>
                     </div>
                     
@@ -318,6 +345,11 @@ export default function InscriptionFormationPage() {
                 <p className="text-lg text-[#1a1a1a]/70 mb-4">
                   {formatDateRange(event.startDate, event.endDate)}
                 </p>
+                {event.description && (
+                  <p className="text-base text-[#1a1a1a]/70 mb-4 leading-relaxed">
+                    {event.description}
+                  </p>
+                )}
                 <div className="inline-block px-6 py-3 bg-green-50 rounded-2xl border border-green-200 mb-4">
                   <p className="text-3xl font-bold text-green-700">
                     {price} €
@@ -326,7 +358,7 @@ export default function InscriptionFormationPage() {
                 {availability && (
                   <div className="inline-block px-4 py-2 bg-blue-50 rounded-xl border border-blue-200">
                     <p className="text-sm font-semibold text-blue-800">
-                      {availability.available} place{availability.available > 1 ? 's' : ''} disponible{availability.available > 1 ? 's' : ''} sur {MAX_PLACES}
+                      {availability.available} place{availability.available > 1 ? 's' : ''} disponible{availability.available > 1 ? 's' : ''} sur {availability.maxPlaces || DEFAULT_MAX_PLACES}
                     </p>
                   </div>
                 )}
@@ -347,9 +379,10 @@ export default function InscriptionFormationPage() {
                           type="text"
                           id="name"
                           required
+                          disabled={availability?.isFull}
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          className="w-full px-4 py-3 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a]"
+                          className="w-full px-4 py-3 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a] disabled:bg-gray-100 disabled:cursor-not-allowed"
                         />
                       </div>
 
@@ -361,9 +394,10 @@ export default function InscriptionFormationPage() {
                           type="email"
                           id="email"
                           required
+                          disabled={availability?.isFull}
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="w-full px-4 py-3 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a]"
+                          className="w-full px-4 py-3 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a] disabled:bg-gray-100 disabled:cursor-not-allowed"
                         />
                       </div>
 
@@ -375,9 +409,10 @@ export default function InscriptionFormationPage() {
                           type="tel"
                           id="phone"
                           required
+                          disabled={availability?.isFull}
                           value={formData.phone}
                           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          className="w-full px-4 py-3 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a]"
+                          className="w-full px-4 py-3 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a] disabled:bg-gray-100 disabled:cursor-not-allowed"
                         />
                       </div>
 
@@ -388,9 +423,10 @@ export default function InscriptionFormationPage() {
                         <textarea
                           id="notes"
                           rows={4}
+                          disabled={availability?.isFull}
                           value={formData.notes}
                           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                          className="w-full px-4 py-3 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a] resize-none"
+                          className="w-full px-4 py-3 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a] resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
                           placeholder="Informations complémentaires..."
                         />
                       </div>
@@ -405,15 +441,15 @@ export default function InscriptionFormationPage() {
                         <div className="p-4 bg-red-50 text-red-800 rounded-2xl border border-red-200">
                           {availability?.isFull 
                             ? 'Cette formation est complète. Impossible de procéder à l\'inscription.' 
-                            : 'Une erreur est survenue. Veuillez réessayer.'}
+                            : errorMessage || 'Une erreur est survenue. Veuillez réessayer.'}
                         </div>
                       )}
 
                       <Button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || availability?.isFull}
                         size="lg"
-                        className="w-full bg-green-700 hover:bg-green-800 text-white"
+                        className="w-full bg-green-700 hover:bg-green-800 text-white disabled:bg-gray-400 disabled:cursor-not-allowed"
                       >
                         {isSubmitting ? 'Traitement en cours...' : `Payer ${price} € et s'inscrire`}
                       </Button>

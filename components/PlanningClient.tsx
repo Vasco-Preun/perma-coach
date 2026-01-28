@@ -16,9 +16,10 @@ interface PlacesAvailability {
   reserved: number
   available: number
   isFull: boolean
+  maxPlaces: number
 }
 
-const MAX_PLACES = 20
+const DEFAULT_MAX_PLACES = 20
 
 export default function PlanningClient({ events: initialEvents }: PlanningClientProps) {
   const [filter, setFilter] = useState<'all' | 'formation' | 'chantier'>('all')
@@ -130,7 +131,8 @@ export default function PlanningClient({ events: initialEvents }: PlanningClient
           sortedEvents.map((event, index) => {
             const availability = event.type === 'formation' ? getFormationAvailability(event.id) : null
             const isFull = availability?.isFull || false
-            const availablePlaces = availability ? availability.available : MAX_PLACES
+            const maxPlaces = availability?.maxPlaces || (event.maxPlaces || DEFAULT_MAX_PLACES)
+            const availablePlaces = availability ? availability.available : maxPlaces
             
             const CardContent = (
               <Card
@@ -187,14 +189,19 @@ export default function PlanningClient({ events: initialEvents }: PlanningClient
                         isFull ? 'text-red-600' : 'text-green-700'
                       }`}>
                         {isFull 
-                          ? `${MAX_PLACES}/${MAX_PLACES} places` 
-                          : `${availablePlaces} place${availablePlaces > 1 ? 's' : ''} disponible${availablePlaces > 1 ? 's' : ''}`
+                          ? `${maxPlaces}/${maxPlaces} places - Complet` 
+                          : `${availablePlaces}/${maxPlaces} places disponible${availablePlaces > 1 ? 's' : ''}`
                         }
                       </p>
                     )}
-                    {!isFull && (
+                    {!isFull && event.type === 'formation' && (
                       <p className="text-sm text-[#1a1a1a]/60 mt-2">
-                        {event.type === 'formation' ? 'S\'inscrire →' : 'S\'inscrire →'}
+                        S'inscrire →
+                      </p>
+                    )}
+                    {!isFull && event.type === 'chantier' && (
+                      <p className="text-sm text-[#1a1a1a]/60 mt-2">
+                        S'inscrire →
                       </p>
                     )}
                   </div>
@@ -212,16 +219,18 @@ export default function PlanningClient({ events: initialEvents }: PlanningClient
               >
                 {isFull ? (
                   CardContent
-                ) : (
-                  <Link
-                    href={
-                      event.type === 'formation'
-                        ? `/inscription-formation/${event.id}`
-                        : `/inscription-chantier/${event.id}`
-                    }
-                  >
+                ) : event.type === 'formation' ? (
+                  <Link href={`/inscription-formation/${event.id}`}>
                     {CardContent}
                   </Link>
+                ) : (
+                  <a
+                    href="https://framaforms.org/chantiers-participatifs-1740318243"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {CardContent}
+                  </a>
                 )}
               </motion.div>
             )

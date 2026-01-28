@@ -53,14 +53,14 @@ export async function POST(request: NextRequest) {
         },
       ]
     } else {
-      // Pour la boutique : plusieurs items (plans, graines, légumes)
+      // Pour la boutique : plusieurs items (plants, graines, légumes)
       lineItems = (items || []).map((item: any) => ({
         price_data: {
           currency: 'eur',
           product_data: {
             name: item.name,
-            description: item.type === 'legume' || item.type === 'graine' || item.type === 'plan'
-              ? `${item.type === 'legume' ? 'Légume' : item.type === 'graine' ? 'Graine' : 'Plan'}${item.category ? ` - ${item.category}` : ''}${item.unit ? ` (${item.unit})` : ''}`
+            description: item.type === 'legume' || item.type === 'graine' || item.type === 'plant'
+              ? `${item.type === 'legume' ? 'Légume' : item.type === 'graine' ? 'Graine' : 'Plant'}${item.category ? ` - ${item.category}` : ''}${item.unit ? ` (${item.unit})` : ''}`
               : undefined,
           },
           unit_amount: Math.round((item.price || 0) * 100), // Convertir en centimes

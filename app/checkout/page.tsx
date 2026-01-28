@@ -40,7 +40,7 @@ export default function CheckoutPage() {
   // Forcer la récupération à la ferme si la livraison à Reims n'est plus possible
   useEffect(() => {
     const legumesPlansSubtotal = cart
-      .filter(item => item.type === 'legume' || item.type === 'plan')
+      .filter(item => item.type === 'legume' || item.type === 'plant')
       .reduce((total, item) => total + ((item.price || 0) * item.quantity), 0)
     
     if (formData.pickupType === 'delivery' && legumesPlansSubtotal < MINIMUM_ORDER) {
@@ -84,17 +84,17 @@ export default function CheckoutPage() {
     return subtotal - discount + graineDelivery
   }
 
-  // Calculer le sous-total des légumes et plans uniquement (pour la validation livraison Reims)
+  // Calculer le sous-total des légumes et plants uniquement (pour la validation livraison Reims)
   const getLegumesAndPlansSubtotal = () => {
     return cart
-      .filter(item => item.type === 'legume' || item.type === 'plan')
+      .filter(item => item.type === 'legume' || item.type === 'plant')
       .reduce((total, item) => {
         const price = item.price || 0
         return total + (price * item.quantity)
       }, 0)
   }
 
-  // Vérifier si la livraison à Reims est possible (minimum 15€ pour légumes/plans)
+  // Vérifier si la livraison à Reims est possible (minimum 15€ pour légumes/plants)
   const canDeliverToReims = () => {
     const legumesPlansSubtotal = getLegumesAndPlansSubtotal()
     return legumesPlansSubtotal >= MINIMUM_ORDER
@@ -112,7 +112,7 @@ export default function CheckoutPage() {
       setFormData(prev => ({ ...prev, pickupType: 'farm' }))
       setMessage({
         type: 'info',
-        text: `La livraison à ${DELIVERY_LOCATION} nécessite un minimum de ${MINIMUM_ORDER}€ pour les légumes et plans. Votre commande sera en récupération à la ferme.`
+        text: `La livraison à ${DELIVERY_LOCATION} nécessite un minimum de ${MINIMUM_ORDER}€ pour les légumes et plants. Votre commande sera en récupération à la ferme.`
       })
     }
 
@@ -261,14 +261,14 @@ export default function CheckoutPage() {
                       Informations de récupération
                     </h2>
                     <div className="p-4 bg-green-50 border-l-4 border-green-500 rounded-r-2xl space-y-2">
-                      {cart.some(item => item.type === 'legume' || item.type === 'plan') && (
+                      {cart.some(item => item.type === 'legume' || item.type === 'plant') && (
                         <div className="space-y-2">
                           <p className="text-sm text-green-800 font-medium flex items-start gap-2">
                             <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            <span>Légumes et plans : Récupération à la ferme ({FARM_ADDRESS}) - toute quantité, paiement en ligne possible dès 1€.</span>
+                            <span>Légumes et plants : Récupération à la ferme ({FARM_ADDRESS}) - toute quantité, paiement en ligne possible dès 1€.</span>
                           </p>
                           {canDeliverToReims() ? (
                             <p className="text-sm text-green-800 font-medium flex items-start gap-2">
@@ -282,7 +282,7 @@ export default function CheckoutPage() {
                               <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                               </svg>
-                              <span>Livraison à {DELIVERY_LOCATION} : minimum {MINIMUM_ORDER}€ requis pour les légumes et plans. Actuellement : {getLegumesAndPlansSubtotal().toFixed(2)}€</span>
+                              <span>Livraison à {DELIVERY_LOCATION} : minimum {MINIMUM_ORDER}€ requis pour les légumes et plants. Actuellement : {getLegumesAndPlansSubtotal().toFixed(2)}€</span>
                             </p>
                           )}
                         </div>
@@ -411,7 +411,7 @@ export default function CheckoutPage() {
                             <div className="text-sm text-[#1a1a1a]/70">
                               {canDeliverToReims() 
                                 ? `À partir de ${MINIMUM_ORDER}€`
-                                : `Minimum ${MINIMUM_ORDER}€ pour les légumes et plans`
+                                : `Minimum ${MINIMUM_ORDER}€ pour les légumes et plants`
                               }
                             </div>
                             {canDeliverToReims() && (
@@ -520,13 +520,13 @@ export default function CheckoutPage() {
                       </span>
                     </div>
                     <div className="pt-3 space-y-2">
-                      {cart.some(item => item.type === 'legume' || item.type === 'plan') && (
+                      {cart.some(item => item.type === 'legume' || item.type === 'plant') && (
                         <div className="flex items-start gap-2 text-xs text-[#1a1a1a]/60">
                           <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
-                          <span>Légumes/Plans : Livraison {DELIVERY_LOCATION} ou récupération à la ferme ({FARM_ADDRESS})</span>
+                          <span>Légumes/Plants : Livraison {DELIVERY_LOCATION} ou récupération à la ferme ({FARM_ADDRESS})</span>
                         </div>
                       )}
                       {cart.some(item => item.type === 'graine') && (

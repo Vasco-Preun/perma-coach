@@ -10,7 +10,8 @@ import ScrollReveal from '@/components/ScrollReveal'
 import ParallaxSection from '@/components/ParallaxSection'
 import HeroSimple from '@/components/HeroSimple'
 import GoogleMap from '@/components/GoogleMap'
-import { getSettings } from '@/lib/data'
+import { getSettings, getEvents } from '@/lib/data'
+import PlanningClient from '@/components/PlanningClient'
 
 export const metadata: Metadata = {
   title: 'Chantiers participatifs - Perma-coach',
@@ -39,6 +40,8 @@ const toBring = [
 
 export default async function ChantiersParticipatifsPage() {
   const settings = await getSettings()
+  const events = await getEvents()
+  const chantiers = events.filter(e => e.type === 'chantier')
 
   return (
     <>
@@ -151,8 +154,31 @@ export default async function ChantiersParticipatifsPage() {
           </div>
         </Section>
 
+        {/* Planning des chantiers */}
+        {chantiers.length > 0 && (
+          <Section padding="xl" background="white" snap className="relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 via-white to-earth-50/30" />
+            <div className="container-custom max-w-4xl relative z-10">
+              <ScrollReveal direction="up">
+                <div className="mb-6">
+                  <span className="inline-block px-4 py-2 bg-gradient-to-r from-earth-100 to-earth-50 rounded-full text-sm font-semibold text-earth-800 mb-4">
+                    Calendrier
+                  </span>
+                  <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] mb-4 leading-tight">
+                    Prochains chantiers
+                  </h2>
+                  <p className="text-lg text-[#1a1a1a]/70 mb-12">
+                    Découvrez les dates des prochains chantiers participatifs
+                  </p>
+                </div>
+                <PlanningClient events={chantiers} />
+              </ScrollReveal>
+            </div>
+          </Section>
+        )}
+
         {/* CTA Inscription */}
-        <Section padding="xl" background="white" snap className="relative overflow-hidden">
+        <Section padding="xl" background="off-white" snap className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-green-50/50 via-white to-earth-50/30" />
           <div className="container-custom max-w-4xl relative z-10">
             <ScrollReveal direction="up">

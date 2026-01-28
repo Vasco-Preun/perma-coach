@@ -1,0 +1,29 @@
+[
+  {
+    "id": "tomate-plant",
+    "name": "Plant de tomate",
+    "enabled": true,
+    "type": "plant",
+    "category": "Solanacées",
+    "price": 3,
+    "unit": "pièce"
+  },
+  {
+    "id": "courgette-plant",
+    "name": "Plant de courgette",
+    "enabled": true,
+    "type": "plant",
+    "category": "Cucurbitacées",
+    "price": 3,
+    "unit": "pièce"
+  },
+  {
+    "id": "aubergine-plant",
+    "name": "Plant d'aubergine",
+    "enabled": true,
+    "type": "plant",
+    "category": "Solanacées",
+    "price": 3.5,
+    "unit": "pièce"
+  }
+]

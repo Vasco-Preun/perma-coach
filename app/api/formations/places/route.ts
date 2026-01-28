@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getKV } from '@/lib/kv'
+import { getEvents } from '@/lib/data'
 
-const MAX_PLACES = 20
+const DEFAULT_MAX_PLACES = 20
 
 async function getOrders(): Promise<any[]> {
   const orders = await getKV('orders')
@@ -10,7 +11,18 @@ async function getOrders(): Promise<any[]> {
 
 export async function GET() {
   try {
-    const orders = await getOrders()
+    const [orders, events] = await Promise.all([
+      getOrders(),
+      getEvents()
+    ])
+    
+    // Créer un map des maxPlaces par formation
+    const maxPlacesByFormation: Record<string, number> = {}
+    events.forEach((event) => {
+      if (event.type === 'formation') {
+        maxPlacesByFormation[event.id] = event.maxPlaces || DEFAULT_MAX_PLACES
+      }
+    })
     
     // Compter les inscriptions par formation (eventId)
     const placesByFormation: Record<string, number> = {}
@@ -24,16 +36,31 @@ export async function GET() {
       }
     })
     
-    // Calculer les places disponibles
-    const availability: Record<string, { reserved: number; available: number; isFull: boolean }> = {}
+    // Calculer les places disponibles en utilisant le maxPlaces de chaque formation
+    const availability: Record<string, { reserved: number; available: number; isFull: boolean; maxPlaces: number }> = {}
     
     Object.keys(placesByFormation).forEach(eventId => {
       const reserved = placesByFormation[eventId]
-      const available = Math.max(0, MAX_PLACES - reserved)
+      const maxPlaces = maxPlacesByFormation[eventId] || DEFAULT_MAX_PLACES
+      const available = Math.max(0, maxPlaces - reserved)
       availability[eventId] = {
         reserved,
         available,
-        isFull: reserved >= MAX_PLACES
+        isFull: reserved >= maxPlaces,
+        maxPlaces
+      }
+    })
+    
+    // Ajouter aussi les formations sans réservations
+    events.forEach((event) => {
+      if (event.type === 'formation' && !availability[event.id]) {
+        const maxPlaces = event.maxPlaces || DEFAULT_MAX_PLACES
+        availability[event.id] = {
+          reserved: 0,
+          available: maxPlaces,
+          isFull: false,
+          maxPlaces
+        }
       }
     })
     

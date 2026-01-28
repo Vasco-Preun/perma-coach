@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Image from 'next/image'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Section from '@/components/ui/Section'
 import Button from '@/components/ui/Button'
 import GlassCard from '@/components/GlassCard'
-import type { Legume, Graine, Plan, ProductType } from '@/lib/data'
+import type { Legume, Graine, Plant, ProductType } from '@/lib/data'
 
-type ProductCategory = 'legumes' | 'graines' | 'plans'
+type ProductCategory = 'legumes' | 'graines' | 'plants'
 
 interface ProductForm {
   id: string
@@ -20,13 +21,14 @@ interface ProductForm {
   unit: string
   isLot: boolean
   lotDescription: string
+  image: string
 }
 
 export default function AdminBoutiquePage() {
   const [activeTab, setActiveTab] = useState<ProductCategory>('legumes')
   const [legumes, setLegumes] = useState<Legume[]>([])
   const [graines, setGraines] = useState<Graine[]>([])
-  const [plans, setPlans] = useState<Plan[]>([])
+  const [plants, setPlants] = useState<Plant[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [password, setPassword] = useState('')
@@ -42,8 +44,10 @@ export default function AdminBoutiquePage() {
     price: '',
     unit: '',
     isLot: false,
-    lotDescription: ''
+    lotDescription: '',
+    image: ''
   })
+  const [uploadingImage, setUploadingImage] = useState(false)
 
   const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'lesjardinsduclos26'
 
@@ -70,19 +74,19 @@ export default function AdminBoutiquePage() {
   const loadAllProducts = async () => {
     setLoading(true)
     try {
-      const [legumesRes, grainesRes, plansRes] = await Promise.all([
+      const [legumesRes, grainesRes, plantsRes] = await Promise.all([
         fetch('/api/legumes'),
         fetch('/api/graines'),
-        fetch('/api/plans')
+        fetch('/api/plants')
       ])
       
-      if (!legumesRes.ok || !grainesRes.ok || !plansRes.ok) {
+      if (!legumesRes.ok || !grainesRes.ok || !plantsRes.ok) {
         throw new Error('Erreur de chargement')
       }
       
       setLegumes(await legumesRes.json())
       setGraines(await grainesRes.json())
-      setPlans(await plansRes.json())
+      setPlants(await plantsRes.json())
       setMessage(null)
     } catch (error) {
       console.error('Error loading products:', error)
@@ -98,8 +102,8 @@ export default function AdminBoutiquePage() {
         return legumes
       case 'graines':
         return graines
-      case 'plans':
-        return plans
+      case 'plants':
+        return plants
     }
   }
 
@@ -111,8 +115,8 @@ export default function AdminBoutiquePage() {
       case 'graines':
         setGraines(products as Graine[])
         break
-      case 'plans':
-        setPlans(products as Plan[])
+      case 'plants':
+        setPlants(products as Plant[])
         break
     }
   }
@@ -123,8 +127,8 @@ export default function AdminBoutiquePage() {
         return '/api/legumes'
       case 'graines':
         return '/api/graines'
-      case 'plans':
-        return '/api/plans'
+      case 'plants':
+        return '/api/plants'
     }
   }
 
@@ -145,6 +149,54 @@ export default function AdminBoutiquePage() {
     setCurrentProducts(updated)
   }
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Vérifier le type de fichier
+    if (!file.type.startsWith('image/')) {
+      setMessage({ type: 'error', text: 'Veuillez sélectionner une image' })
+      return
+    }
+
+    // Vérifier la taille (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'L\'image est trop volumineuse (max 5MB)' })
+      return
+    }
+
+    setUploadingImage(true)
+    setMessage(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('image', file)
+      formData.append('productType', activeTab)
+
+      const response = await fetch('/api/admin/upload-image', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${ADMIN_PASSWORD}`
+        },
+        body: formData
+      })
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de l\'upload')
+      }
+
+      const data = await response.json()
+      setFormData(prev => ({ ...prev, image: data.imagePath }))
+      setMessage({ type: 'success', text: 'Image uploadée avec succès' })
+      setTimeout(() => setMessage(null), 2000)
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      setMessage({ type: 'error', text: 'Erreur lors de l\'upload de l\'image' })
+    } finally {
+      setUploadingImage(false)
+    }
+  }
+
   const startEdit = (product: any) => {
     setEditingProduct(product.id)
     setFormData({
@@ -155,7 +207,8 @@ export default function AdminBoutiquePage() {
       price: product.price?.toString() || '',
       unit: product.unit || '',
       isLot: product.isLot || false,
-      lotDescription: product.lotDescription || ''
+      lotDescription: product.lotDescription || '',
+      image: product.image || ''
     })
   }
 
@@ -169,7 +222,8 @@ export default function AdminBoutiquePage() {
       price: '',
       unit: '',
       isLot: false,
-      lotDescription: ''
+      lotDescription: '',
+      image: ''
     })
     setShowAddForm(true)
   }
@@ -185,7 +239,8 @@ export default function AdminBoutiquePage() {
       price: '',
       unit: '',
       isLot: false,
-      lotDescription: ''
+      lotDescription: '',
+      image: ''
     })
   }
 
@@ -225,14 +280,15 @@ export default function AdminBoutiquePage() {
       price: formData.price ? parseFloat(formData.price) : undefined,
       unit: formData.unit.trim() || undefined,
       isLot: formData.isLot,
-      lotDescription: formData.lotDescription.trim() || undefined
+      lotDescription: formData.lotDescription.trim() || undefined,
+      image: formData.image.trim() || undefined
     }
 
     // Ajouter le type selon l'onglet actif
     if (activeTab === 'graines') {
       productData.type = 'graine'
-    } else if (activeTab === 'plans') {
-      productData.type = 'plan'
+    } else if (activeTab === 'plants') {
+      productData.type = 'plant'
     }
 
     let updated: any[]
@@ -256,7 +312,7 @@ export default function AdminBoutiquePage() {
     try {
       const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'lesjardinsduclos26'
       
-      const [legumesRes, grainesRes, plansRes] = await Promise.all([
+      const [legumesRes, grainesRes, plantsRes] = await Promise.all([
         fetch('/api/legumes', {
           method: 'POST',
           headers: { 
@@ -273,17 +329,17 @@ export default function AdminBoutiquePage() {
           },
           body: JSON.stringify(graines),
         }),
-        fetch('/api/plans', {
+        fetch('/api/plants', {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${ADMIN_PASSWORD}`
           },
-          body: JSON.stringify(plans),
+          body: JSON.stringify(plants),
         })
       ])
 
-      if (legumesRes.ok && grainesRes.ok && plansRes.ok) {
+      if (legumesRes.ok && grainesRes.ok && plantsRes.ok) {
         setMessage({ type: 'success', text: 'Toutes les modifications ont été enregistrées avec succès !' })
         setTimeout(() => setMessage(null), 3000)
       } else {
@@ -302,8 +358,8 @@ export default function AdminBoutiquePage() {
         return 'Légumes'
       case 'graines':
         return 'Graines'
-      case 'plans':
-        return 'Plans'
+      case 'plants':
+        return 'Plants'
     }
   }
 
@@ -406,7 +462,7 @@ export default function AdminBoutiquePage() {
                   Gestion de la boutique
                 </h1>
                 <p className="text-[#1a1a1a]/70">
-                  Gérez les légumes, graines et plans disponibles
+                  Gérez les légumes, graines et plants disponibles
                 </p>
               </div>
               <div className="flex items-center gap-4">
@@ -442,7 +498,7 @@ export default function AdminBoutiquePage() {
         <Section padding="md" background="white" className="border-b border-green-200/50">
           <div className="container-custom max-w-6xl">
             <div className="flex gap-2 md:gap-4">
-              {(['legumes', 'graines', 'plans'] as ProductCategory[]).map((tab) => (
+              {(['legumes', 'graines', 'plants'] as ProductCategory[]).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => {
@@ -563,6 +619,62 @@ export default function AdminBoutiquePage() {
                       />
                     </div>
                   )}
+                  
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-semibold text-[#1a1a1a] mb-2">
+                      Image du produit
+                    </label>
+                    <div className="space-y-3">
+                      {formData.image && (
+                        <div className="relative w-32 h-32 rounded-xl overflow-hidden border-2 border-green-200">
+                          <Image
+                            src={formData.image}
+                            alt="Aperçu"
+                            fill
+                            className="object-cover"
+                            sizes="128px"
+                          />
+                        </div>
+                      )}
+                      <div className="flex gap-3">
+                        <label className="flex-1 cursor-pointer">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageUpload}
+                            disabled={uploadingImage}
+                            className="hidden"
+                          />
+                          <div className={`w-full px-4 py-2.5 border-2 border-earth-200 rounded-2xl text-center transition-all ${
+                            uploadingImage 
+                              ? 'bg-earth-100 text-earth-400 cursor-not-allowed' 
+                              : 'bg-white text-[#1a1a1a] hover:bg-green-50 hover:border-green-300 cursor-pointer'
+                          }`}>
+                            {uploadingImage ? 'Upload en cours...' : formData.image ? 'Changer l\'image' : 'Uploader une image'}
+                          </div>
+                        </label>
+                        {formData.image && (
+                          <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, image: '' })}
+                            className="px-4 py-2.5 bg-red-50 text-red-700 rounded-2xl hover:bg-red-100 transition-colors"
+                          >
+                            Supprimer
+                          </button>
+                        )}
+                      </div>
+                      <input
+                        type="text"
+                        value={formData.image}
+                        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                        className="w-full px-4 py-2.5 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a] text-sm"
+                        placeholder="Ou entrez un chemin d'image manuellement (ex: /images/boutique/carotte.jpg)"
+                      />
+                      <p className="text-xs text-[#1a1a1a]/60">
+                        Formats acceptés: JPG, PNG, WebP (max 5MB). Les images seront stockées dans /public/images/boutique/
+                      </p>
+                    </div>
+                  </div>
                   
                   <div className="md:col-span-2 flex items-center gap-2">
                     <label className="flex items-center gap-2">

@@ -39,3 +39,5 @@ next-env.d.ts
 # Les fichiers JSON de données sont commités pour avoir les données initiales en production
 # /data/*.json
 !/data/.gitkeep
+.env.local.save
+CONFIGURATION_WEBHOOK_FORMATIONS.md

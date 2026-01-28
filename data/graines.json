@@ -1,0 +1,29 @@
+[
+  {
+    "id": "tomate-cerise",
+    "name": "Tomate cerise",
+    "enabled": true,
+    "type": "graine",
+    "category": "Solanacées",
+    "price": 2.5,
+    "unit": "sachet"
+  },
+  {
+    "id": "basilic",
+    "name": "Basilic",
+    "enabled": true,
+    "type": "graine",
+    "category": "Aromatiques",
+    "price": 2,
+    "unit": "sachet"
+  },
+  {
+    "id": "salade",
+    "name": "Salade",
+    "enabled": true,
+    "type": "graine",
+    "category": "Légumes feuilles",
+    "price": 2,
+    "unit": "sachet"
+  }
+]

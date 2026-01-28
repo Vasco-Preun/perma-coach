@@ -10,6 +10,7 @@ import Hero from '@/components/Hero'
 import VideoBackground from '@/components/VideoBackground'
 import GoogleMap from '@/components/GoogleMap'
 import Image from 'next/image'
+import Link from 'next/link'
 import { getSettings, getEvents } from '@/lib/data'
 
 // Désactiver le cache pour que les modifications admin soient visibles immédiatement
@@ -287,36 +288,88 @@ export default async function Home() {
               <div className="grid md:grid-cols-2 gap-8">
                 {upcomingEvents.map((event, index) => (
                   <ScrollReveal key={event.id || index} direction="up" delay={index * 150}>
-                    <GlassCard hover className="group h-full flex flex-col">
-                      <div className="flex flex-col h-full">
-                        <div className="flex items-center gap-3 mb-4">
-                          <span
-                            className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
-                              event.type === 'formation'
-                                ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
-                                : 'bg-gradient-to-r from-earth-500 to-earth-600 text-white shadow-lg'
-                            }`}
-                          >
-                            {event.type === 'formation' ? 'Formation' : 'Chantier'}
-                          </span>
-                        </div>
-                        <h3 className="text-2xl font-serif text-[#1a1a1a] mb-4 group-hover:text-green-700 transition-colors flex-1">
-                          {event.title}
-                        </h3>
-                        <p className="text-base text-[#1a1a1a]/60 font-medium mt-auto">
-                          {new Date(event.startDate).toLocaleDateString('fr-FR', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                          })}
-                          {event.endDate &&
-                            ` - ${new Date(event.endDate).toLocaleDateString('fr-FR', {
-                              day: 'numeric',
-                              month: 'long',
-                            })}`}
-                        </p>
-                      </div>
-                    </GlassCard>
+                    {event.type === 'formation' ? (
+                      <Link href={`/inscription-formation/${event.id}`}>
+                        <GlassCard hover className="group h-full flex flex-col cursor-pointer">
+                          <div className="flex flex-col h-full">
+                            <div className="flex items-center gap-3 mb-4">
+                              <span
+                                className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
+                                  event.type === 'formation'
+                                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
+                                    : 'bg-gradient-to-r from-earth-500 to-earth-600 text-white shadow-lg'
+                                }`}
+                              >
+                                {event.type === 'formation' ? 'Formation' : 'Chantier'}
+                              </span>
+                            </div>
+                            <h3 className="text-2xl font-serif text-[#1a1a1a] mb-3 group-hover:text-green-700 transition-colors flex-1">
+                              {event.title}
+                            </h3>
+                            {event.description && (
+                              <p className="text-base text-[#1a1a1a]/70 mb-4 line-clamp-3">
+                                {event.description}
+                              </p>
+                            )}
+                            <p className="text-base text-[#1a1a1a]/60 font-medium mt-auto">
+                              {new Date(event.startDate).toLocaleDateString('fr-FR', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                              })}
+                              {event.endDate &&
+                                ` - ${new Date(event.endDate).toLocaleDateString('fr-FR', {
+                                  day: 'numeric',
+                                  month: 'long',
+                                })}`}
+                            </p>
+                          </div>
+                        </GlassCard>
+                      </Link>
+                    ) : (
+                      <a
+                        href="https://framaforms.org/chantiers-participatifs-1740318243"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block"
+                      >
+                        <GlassCard hover className="group h-full flex flex-col cursor-pointer">
+                          <div className="flex flex-col h-full">
+                            <div className="flex items-center gap-3 mb-4">
+                              <span
+                                className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
+                                  event.type === 'formation'
+                                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
+                                    : 'bg-gradient-to-r from-earth-500 to-earth-600 text-white shadow-lg'
+                                }`}
+                              >
+                                {event.type === 'formation' ? 'Formation' : 'Chantier'}
+                              </span>
+                            </div>
+                            <h3 className="text-2xl font-serif text-[#1a1a1a] mb-3 group-hover:text-green-700 transition-colors flex-1">
+                              {event.title}
+                            </h3>
+                            {event.description && (
+                              <p className="text-base text-[#1a1a1a]/70 mb-4 line-clamp-3">
+                                {event.description}
+                              </p>
+                            )}
+                            <p className="text-base text-[#1a1a1a]/60 font-medium mt-auto">
+                              {new Date(event.startDate).toLocaleDateString('fr-FR', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                              })}
+                              {event.endDate &&
+                                ` - ${new Date(event.endDate).toLocaleDateString('fr-FR', {
+                                  day: 'numeric',
+                                  month: 'long',
+                                })}`}
+                            </p>
+                          </div>
+                        </GlassCard>
+                      </a>
+                    )}
                   </ScrollReveal>
                 ))}
               </div>

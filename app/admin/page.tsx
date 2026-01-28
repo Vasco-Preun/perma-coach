@@ -276,36 +276,58 @@ export default function AdminPage() {
                       </div>
                     </div>
                     {event.type === 'formation' && (
-                      <div className="mt-4">
-                        <label className="block text-sm font-semibold text-[#1a1a1a] mb-2">
-                          Prix personnalisé (€) - Optionnel
-                        </label>
-                        <input
-                          type="number"
-                          value={event.price || ''}
-                          onChange={(e) => updateEvent(event.id, 'price', e.target.value ? parseFloat(e.target.value) : undefined)}
-                          placeholder="Laisser vide pour calcul automatique (2j=200€, 4j=500€)"
-                          min="0"
-                          step="0.01"
-                          className="w-full px-4 py-2.5 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a]"
-                        />
-                        <p className="mt-1 text-xs text-[#1a1a1a]/60">
-                          Si vide, le prix sera calculé automatiquement : 200€ pour 2 jours, 500€ pour 4 jours
-                        </p>
-                      </div>
+                      <>
+                        <div className="mt-4">
+                          <label className="block text-sm font-semibold text-[#1a1a1a] mb-2">
+                            Prix personnalisé (€) - Optionnel
+                          </label>
+                          <input
+                            type="number"
+                            value={event.price || ''}
+                            onChange={(e) => updateEvent(event.id, 'price', e.target.value ? parseFloat(e.target.value) : undefined)}
+                            placeholder="Laisser vide pour calcul automatique (2j=200€, 4j=500€)"
+                            min="0"
+                            step="0.01"
+                            className="w-full px-4 py-2.5 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a]"
+                          />
+                          <p className="mt-1 text-xs text-[#1a1a1a]/60">
+                            Si vide, le prix sera calculé automatiquement : 200€ pour 2 jours, 500€ pour 4 jours
+                          </p>
+                        </div>
+                        <div className="mt-4">
+                          <label className="block text-sm font-semibold text-[#1a1a1a] mb-2">
+                            Nombre de places disponibles
+                          </label>
+                          <input
+                            type="number"
+                            value={event.maxPlaces || ''}
+                            onChange={(e) => updateEvent(event.id, 'maxPlaces', e.target.value ? parseInt(e.target.value, 10) : undefined)}
+                            placeholder="Défaut: 20 places"
+                            min="1"
+                            step="1"
+                            className="w-full px-4 py-2.5 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a]"
+                          />
+                          <p className="mt-1 text-xs text-[#1a1a1a]/60">
+                            Nombre maximum de participants pour cette formation. Si vide, 20 places par défaut.
+                          </p>
+                        </div>
+                      </>
                     )}
-                    {event.description && (
-                      <div className="mt-4">
-                        <label className="block text-sm font-semibold text-[#1a1a1a] mb-2">Description (optionnel)</label>
-                        <textarea
-                          value={event.description}
-                          onChange={(e) => updateEvent(event.id, 'description', e.target.value)}
-                          rows={2}
-                          placeholder="Description de la formation..."
-                          className="w-full px-4 py-2.5 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a] resize-none"
-                        />
-                      </div>
-                    )}
+                    <div className="mt-4">
+                      <label className="block text-sm font-semibold text-[#1a1a1a] mb-2">
+                        Description (optionnel)
+                      </label>
+                      <textarea
+                        value={event.description || ''}
+                        onChange={(e) => updateEvent(event.id, 'description', e.target.value || undefined)}
+                        rows={4}
+                        placeholder={event.type === 'formation' ? 'Description de la formation...' : 'Description du chantier...'}
+                        className="w-full px-4 py-2.5 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a] resize-y"
+                      />
+                      <p className="mt-1 text-xs text-[#1a1a1a]/60">
+                        Cette description sera affichée sur la page des formations/chantiers
+                      </p>
+                    </div>
                     <div className="mt-4 flex justify-end">
                       <Button
                         onClick={() => removeEvent(event.id)}

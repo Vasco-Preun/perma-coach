@@ -10,9 +10,9 @@ import Button from '@/components/ui/Button'
 import ScrollReveal from '@/components/ScrollReveal'
 import GoogleMap from '@/components/GoogleMap'
 import GlassCard from '@/components/GlassCard'
-import type { Legume, Graine, Plan, Product, ProductType } from '@/lib/data'
+import type { Legume, Graine, Plant, Product, ProductType } from '@/lib/data'
 
-type ProductCategory = 'legumes' | 'graines' | 'plans'
+type ProductCategory = 'legumes' | 'graines' | 'plants'
 
 interface CartItem extends Product {
   quantity: number
@@ -22,7 +22,7 @@ export default function BoutiquePage() {
   const [activeTab, setActiveTab] = useState<ProductCategory>('legumes')
   const [legumes, setLegumes] = useState<Legume[]>([])
   const [graines, setGraines] = useState<Graine[]>([])
-  const [plans, setPlans] = useState<Plan[]>([])
+  const [plants, setPlants] = useState<Plant[]>([])
   const [cart, setCart] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -42,23 +42,23 @@ export default function BoutiquePage() {
   const loadAllProducts = async () => {
     setLoading(true)
     try {
-      const [legumesRes, grainesRes, plansRes] = await Promise.all([
+      const [legumesRes, grainesRes, plantsRes] = await Promise.all([
         fetch('/api/legumes'),
         fetch('/api/graines'),
-        fetch('/api/plans')
+        fetch('/api/plants')
       ])
       
-      if (!legumesRes.ok || !grainesRes.ok || !plansRes.ok) {
+      if (!legumesRes.ok || !grainesRes.ok || !plantsRes.ok) {
         throw new Error('Erreur de chargement')
       }
       
       const legumesData = await legumesRes.json()
       const grainesData = await grainesRes.json()
-      const plansData = await plansRes.json()
+      const plantsData = await plantsRes.json()
       
       setLegumes(legumesData.filter((l: Legume) => l.enabled))
       setGraines(grainesData.filter((g: Graine) => g.enabled))
-      setPlans(plansData.filter((p: Plan) => p.enabled))
+      setPlants(plantsData.filter((p: Plant) => p.enabled))
       setError(null)
     } catch (error) {
       console.error('Error loading products:', error)
@@ -68,7 +68,7 @@ export default function BoutiquePage() {
     }
   }
 
-  const MINIMUM_ORDER = 15 // Pour légumes et plans uniquement
+  const MINIMUM_ORDER = 15 // Pour légumes et plants uniquement
   const DISCOUNT_THRESHOLD = 25
   const DISCOUNT_PERCENTAGE = 15
   const DELIVERY_LOCATION = 'Reims'
@@ -113,7 +113,7 @@ export default function BoutiquePage() {
   
   // Fonction pour afficher le message du minimum (informations seulement)
   const getMinimumMessage = () => {
-    const legumesAndPlans = cart.filter(item => item.type === 'legume' || item.type === 'plan')
+    const legumesAndPlans = cart.filter(item => item.type === 'legume' || item.type === 'plant')
     const subtotalLegumesPlans = legumesAndPlans.reduce((total, item) => {
       const price = item.price || 0
       return total + (price * item.quantity)
@@ -132,7 +132,7 @@ export default function BoutiquePage() {
 
   const getLegumesAndPlansSubtotal = () => {
     return cart
-      .filter(item => item.type === 'legume' || item.type === 'plan')
+      .filter(item => item.type === 'legume' || item.type === 'plant')
       .reduce((total, item) => {
         const price = item.price || 0
         return total + (price * item.quantity)
@@ -177,8 +177,8 @@ export default function BoutiquePage() {
         return legumes.map(l => ({ ...l, type: 'legume' as const })) as Product[]
       case 'graines':
         return graines as Product[]
-      case 'plans':
-        return plans as Product[]
+      case 'plants':
+        return plants as Product[]
       default:
         return []
     }
@@ -195,8 +195,8 @@ export default function BoutiquePage() {
         return 'Légumes'
       case 'graines':
         return 'Graines'
-      case 'plans':
-        return 'Plans'
+      case 'plants':
+        return 'Plants'
     }
   }
 
@@ -212,14 +212,25 @@ export default function BoutiquePage() {
         viewport={{ once: true }}
         transition={{ duration: 0.4, delay: index * 0.05 }}
         whileHover={{ y: -4 }}
-        className="group"
+        className="group h-full"
       >
-        <div className={`relative h-full bg-white rounded-3xl border-2 transition-all duration-300 ${
+        <div className={`relative flex flex-col h-full bg-white rounded-3xl border-2 transition-all duration-300 ${
           isInCart
             ? 'border-green-500 shadow-xl shadow-green-500/10'
             : 'border-green-200/50 hover:border-green-300 shadow-lg hover:shadow-xl'
         } overflow-hidden`}>
-          <div className="p-6 md:p-8 flex flex-col h-full">
+          {product.image && (
+            <div className="relative w-full h-48 md:h-56 flex-shrink-0 overflow-hidden">
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
+          )}
+          <div className="p-6 md:p-8 flex flex-col flex-grow min-h-0">
             <h4 className="text-2xl md:text-3xl font-serif text-[#1a1a1a] mb-3 group-hover:text-green-700 transition-colors">
               {product.name}
             </h4>
@@ -526,7 +537,7 @@ export default function BoutiquePage() {
         <Section padding="sm" background="white" className="sticky top-20 z-40 border-b border-green-200/50 py-3 md:py-4">
           <div className="container-custom max-w-7xl">
             <div className="flex gap-2 md:gap-3 justify-center">
-              {(['legumes', 'graines', 'plans'] as ProductCategory[]).map((tab) => (
+              {(['legumes', 'graines', 'plants'] as ProductCategory[]).map((tab) => (
                 <motion.button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
@@ -596,7 +607,7 @@ export default function BoutiquePage() {
                 className="mb-16"
               >
                 <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-3xl border border-green-200/50 p-6 md:p-8">
-                  {activeTab === 'legumes' || activeTab === 'plans' ? (
+                  {activeTab === 'legumes' || activeTab === 'plants' ? (
                   <div className="grid md:grid-cols-3 gap-6 text-center md:text-left">
                     <div className="flex flex-col md:flex-row items-center md:items-start gap-3">
                       <div className="w-12 h-12 bg-green-600 rounded-2xl flex items-center justify-center flex-shrink-0">
@@ -697,7 +708,7 @@ export default function BoutiquePage() {
                         <div className="mt-3 h-px w-24 bg-gradient-to-r from-green-400 to-transparent"></div>
                       </div>
                       
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 items-stretch">
                         {categoryProducts.map((product, index) => renderProductCard(product, index))}
                       </div>
                     </motion.div>

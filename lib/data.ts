@@ -16,6 +16,7 @@ export interface Event {
   endDate?: string
   description?: string
   price?: number // Prix personnalisé (optionnel, sinon calculé automatiquement selon la durée)
+  maxPlaces?: number // Nombre maximum de places pour les formations (optionnel, défaut: 20)
 }
 
 export interface GalleryImage {
@@ -35,10 +36,11 @@ export interface Legume {
   unit?: string
   isLot?: boolean
   lotDescription?: string
+  image?: string // Chemin vers l'image du légume
 }
 
 // Type générique pour les produits de la boutique
-export type ProductType = 'legume' | 'graine' | 'plan'
+export type ProductType = 'legume' | 'graine' | 'plant'
 
 export interface Product {
   id: string
@@ -50,6 +52,7 @@ export interface Product {
   unit?: string
   isLot?: boolean
   lotDescription?: string
+  image?: string // Chemin vers l'image du produit
 }
 
 // Types spécifiques pour compatibilité
@@ -57,8 +60,8 @@ export interface Graine extends Omit<Product, 'type'> {
   type: 'graine'
 }
 
-export interface Plan extends Omit<Product, 'type'> {
-  type: 'plan'
+export interface Plant extends Omit<Product, 'type'> {
+  type: 'plant'
 }
 
 // Fonctions pour lire/écrire les données via KV (production) ou JSON (local)
@@ -100,13 +103,19 @@ export async function saveSettings(settings: SiteSettings): Promise<void> {
 export async function getEvents(): Promise<Event[]> {
   const defaultEvents: Event[] = [
     { id: '1', type: 'formation', title: 'Formation plantation arbre fruitier', startDate: '2026-02-13', endDate: '2026-02-14' },
-    { id: '2', type: 'chantier', title: 'Chantier plantation arbre fruitier', startDate: '2026-02-21', endDate: '2026-02-22' },
-    { id: '3', type: 'chantier', title: 'Chantier plantation arbre fruitier', startDate: '2026-03-08' },
+    { id: '2', type: 'chantier', title: 'Plantation arbres fruitiers', startDate: '2026-02-21' },
+    { id: '3', type: 'chantier', title: 'Plantation arbres fruitiers', startDate: '2026-02-22' },
     { id: '4', type: 'formation', title: 'Formation initiation permaculture – créer son potager', startDate: '2026-03-18', endDate: '2026-03-22' },
     { id: '5', type: 'formation', title: 'Formation initiation permaculture – approfondie', startDate: '2026-04-16', endDate: '2026-04-19' },
     { id: '6', type: 'formation', title: 'Formation initiation permaculture', startDate: '2026-05-01', endDate: '2026-05-02' },
     { id: '7', type: 'formation', title: 'Formation initiation permaculture – approfondie', startDate: '2026-05-12', endDate: '2026-05-15' },
     { id: '8', type: 'formation', title: 'Formation initiation permaculture', startDate: '2026-06-06', endDate: '2026-06-07' },
+    { id: '9', type: 'chantier', title: 'Montage de la serre à plant en verre', startDate: '2026-03-02' },
+    { id: '10', type: 'chantier', title: 'Montage de la serre à plant en verre', startDate: '2026-03-03' },
+    { id: '11', type: 'chantier', title: 'Montage de la serre à plant en verre', startDate: '2026-03-06' },
+    { id: '12', type: 'chantier', title: 'Plantation arbres fruitiers', startDate: '2026-03-08' },
+    { id: '13', type: 'chantier', title: 'Mise en place de culture choux tomates poireaux', startDate: '2026-05-07' },
+    { id: '14', type: 'chantier', title: 'Mise en place de culture choux tomates poireaux', startDate: '2026-05-08' },
   ]
   
   try {
@@ -202,27 +211,27 @@ export async function getEnabledGraines(): Promise<Graine[]> {
   return graines.filter(graine => graine.enabled)
 }
 
-// Fonctions pour les plans
-export async function getPlans(): Promise<Plan[]> {
-  const defaultPlans: Plan[] = [
-    { id: 'tomate-plan', name: 'Plan de tomate', enabled: true, type: 'plan', category: 'Solanacées', price: 3.0, unit: 'pièce' },
-    { id: 'courgette-plan', name: 'Plan de courgette', enabled: true, type: 'plan', category: 'Cucurbitacées', price: 3.0, unit: 'pièce' },
-    { id: 'aubergine-plan', name: 'Plan d\'aubergine', enabled: true, type: 'plan', category: 'Solanacées', price: 3.5, unit: 'pièce' },
+// Fonctions pour les plants
+export async function getPlants(): Promise<Plant[]> {
+  const defaultPlants: Plant[] = [
+    { id: 'tomate-plant', name: 'Plant de tomate', enabled: true, type: 'plant', category: 'Solanacées', price: 3.0, unit: 'pièce' },
+    { id: 'courgette-plant', name: 'Plant de courgette', enabled: true, type: 'plant', category: 'Cucurbitacées', price: 3.0, unit: 'pièce' },
+    { id: 'aubergine-plant', name: 'Plant d\'aubergine', enabled: true, type: 'plant', category: 'Solanacées', price: 3.5, unit: 'pièce' },
   ]
   
-  const data = await readData('plans', defaultPlans)
+  const data = await readData('plants', defaultPlants)
   if (!data || data.length === 0) {
-    await writeData('plans', defaultPlans)
-    return defaultPlans
+    await writeData('plants', defaultPlants)
+    return defaultPlants
   }
   return data
 }
 
-export async function savePlans(plans: Plan[]): Promise<void> {
-  await writeData('plans', plans)
+export async function savePlants(plants: Plant[]): Promise<void> {
+  await writeData('plants', plants)
 }
 
-export async function getEnabledPlans(): Promise<Plan[]> {
-  const plans = await getPlans()
-  return plans.filter(plan => plan.enabled)
+export async function getEnabledPlants(): Promise<Plant[]> {
+  const plants = await getPlants()
+  return plants.filter(plant => plant.enabled)
 }

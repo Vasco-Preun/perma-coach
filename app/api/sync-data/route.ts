@@ -12,7 +12,7 @@ export async function POST() {
     const errors: string[] = []
 
     // Liste des fichiers à synchroniser
-    const filesToSync = ['events', 'legumes', 'graines', 'plans', 'settings', 'gallery']
+    const filesToSync = ['events', 'legumes', 'graines', 'plants', 'settings', 'gallery']
 
     for (const key of filesToSync) {
       try {
