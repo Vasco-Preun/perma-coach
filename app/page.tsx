@@ -337,13 +337,9 @@ export default async function Home() {
                           <div className="flex flex-col h-full">
                             <div className="flex items-center gap-3 mb-4">
                               <span
-                                className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider ${
-                                  event.type === 'formation'
-                                    ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
-                                    : 'bg-gradient-to-r from-earth-500 to-earth-600 text-white shadow-lg'
-                                }`}
+                                className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-gradient-to-r from-earth-500 to-earth-600 text-white shadow-lg"
                               >
-                                {event.type === 'formation' ? 'Formation' : 'Chantier'}
+                                Chantier
                               </span>
                             </div>
                             <h3 className="text-2xl font-serif text-[#1a1a1a] mb-3 group-hover:text-green-700 transition-colors flex-1">
