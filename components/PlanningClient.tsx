@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import type { Event } from '@/lib/data'
 import Card from '@/components/ui/Card'
@@ -136,7 +137,7 @@ export default function PlanningClient({ events: initialEvents }: PlanningClient
             
             const CardContent = (
               <Card
-                className={`transition-all duration-200 ${
+                className={`transition-all duration-200 overflow-hidden ${
                   isFull
                     ? 'bg-gray-100 border-gray-300 opacity-75'
                     : event.type === 'formation'
@@ -144,8 +145,20 @@ export default function PlanningClient({ events: initialEvents }: PlanningClient
                     : 'bg-earth-50 border-earth-200 hover:border-earth-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer'
                 }`}
               >
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="flex-1">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {event.image && (
+                    <div className="relative w-full sm:w-40 h-32 sm:h-auto sm:min-h-[140px] flex-shrink-0 rounded-xl overflow-hidden bg-[#1a1a1a]/5">
+                      <Image
+                        src={event.image}
+                        alt={event.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 640px) 100vw, 160px"
+                      />
+                    </div>
+                  )}
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-1 min-w-0">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-3 flex-wrap">
                       <Badge
                         variant={event.type === 'formation' ? 'green' : 'earth'}
@@ -204,6 +217,7 @@ export default function PlanningClient({ events: initialEvents }: PlanningClient
                         S'inscrire →
                       </p>
                     )}
+                  </div>
                   </div>
                 </div>
               </Card>

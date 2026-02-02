@@ -1,5 +1,17 @@
 # Comment lancer le serveur
 
+## Mise à jour automatique (recommandé)
+
+Pour que **les modifications du code s’affichent automatiquement** sur http://localhost:3001 (sans rebuild manuel), lancez le serveur en mode développement :
+
+```bash
+npm run dev
+```
+
+Le site sera disponible sur **http://localhost:3001**. Chaque fois qu'un fichier est enregistré (par vous ou par l'assistant), Next.js recompile : rafraîchissez la page (F5) pour voir les changements. Ne pas utiliser `npm run build` + `npm run start` pour le travail au quotidien : ce mode ne se met pas à jour tout seul.
+
+---
+
 ## Le problème "Safari ne parvient pas à se connecter"
 
 Cela signifie que **le serveur de développement n'est pas lancé**.

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Section from '@/components/ui/Section'
@@ -13,6 +14,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [uploadingImageForEventId, setUploadingImageForEventId] = useState<string | null>(null)
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
   const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'lesjardinsduclos26'
@@ -93,6 +95,39 @@ export default function AdminPage() {
 
   const updateEvent = (id: string, field: keyof Event, value: any) => {
     setEvents(events.map(e => e.id === id ? { ...e, [field]: value } : e))
+  }
+
+  const handleEventImageUpload = async (eventId: string, file: File) => {
+    if (!file.type.startsWith('image/')) {
+      setMessage({ type: 'error', text: 'Veuillez sélectionner une image' })
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'L\'image est trop volumineuse (max 5MB)' })
+      return
+    }
+    setUploadingImageForEventId(eventId)
+    setMessage(null)
+    try {
+      const formData = new FormData()
+      formData.append('image', file)
+      formData.append('folder', 'formations')
+      const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'lesjardinsduclos26'
+      const response = await fetch('/api/admin/upload-image', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` },
+        body: formData,
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Erreur upload')
+      updateEvent(eventId, 'image', data.imagePath)
+      setMessage({ type: 'success', text: 'Image ajoutée' })
+      setTimeout(() => setMessage(null), 2000)
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Erreur lors de l\'upload de l\'image' })
+    } finally {
+      setUploadingImageForEventId(null)
+    }
   }
 
   // Page de connexion
@@ -272,6 +307,63 @@ export default function AdminPage() {
                           value={event.endDate || ''}
                           onChange={(e) => updateEvent(event.id, 'endDate', e.target.value || undefined)}
                           className="w-full px-4 py-2.5 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a]"
+                        />
+                      </div>
+                    </div>
+                    {/* Photo - visible pour toutes les formations/chantiers */}
+                    <div className="mt-4 p-4 bg-green-50/50 rounded-2xl border border-green-200">
+                      <label className="block text-sm font-semibold text-[#1a1a1a] mb-2">
+                        Photo (optionnel)
+                      </label>
+                      <div className="space-y-3">
+                        {event.image && (
+                          <div className="relative w-32 h-32 rounded-xl overflow-hidden border-2 border-green-200">
+                            <Image
+                              src={event.image}
+                              alt={event.title || 'Aperçu'}
+                              fill
+                              className="object-cover"
+                              sizes="128px"
+                            />
+                          </div>
+                        )}
+                        <div className="flex flex-wrap gap-3 items-center">
+                          <label className="cursor-pointer">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              disabled={uploadingImageForEventId === event.id}
+                              onChange={(e) => {
+                                const f = e.target.files?.[0]
+                                if (f) handleEventImageUpload(event.id, f)
+                                e.target.value = ''
+                              }}
+                            />
+                            <span className={`inline-block px-4 py-2.5 border-2 border-green-300 rounded-2xl text-sm font-medium transition-all bg-white text-[#1a1a1a] hover:bg-green-100 hover:border-green-400 ${
+                              uploadingImageForEventId === event.id
+                                ? 'bg-earth-100 text-earth-500 cursor-not-allowed border-earth-200'
+                                : ''
+                            }`}>
+                              {uploadingImageForEventId === event.id ? 'Upload en cours...' : event.image ? 'Changer l\'image' : 'Ajouter une photo'}
+                            </span>
+                          </label>
+                          {event.image && (
+                            <button
+                              type="button"
+                              onClick={() => updateEvent(event.id, 'image', undefined)}
+                              className="px-4 py-2.5 bg-red-50 text-red-700 rounded-2xl hover:bg-red-100 text-sm font-medium"
+                            >
+                              Supprimer l'image
+                            </button>
+                          )}
+                        </div>
+                        <input
+                          type="text"
+                          value={event.image || ''}
+                          onChange={(e) => updateEvent(event.id, 'image', e.target.value || undefined)}
+                          placeholder="Ou collez un chemin d'image (ex: /images/formations/photo.jpg)"
+                          className="w-full px-4 py-2.5 border-2 border-earth-200 rounded-2xl text-sm bg-white text-[#1a1a1a] focus:ring-2 focus:ring-green-500 focus:border-green-500"
                         />
                       </div>
                     </div>

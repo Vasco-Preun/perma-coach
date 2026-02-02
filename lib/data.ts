@@ -17,6 +17,7 @@ export interface Event {
   description?: string
   price?: number // Prix personnalisé (optionnel, sinon calculé automatiquement selon la durée)
   maxPlaces?: number // Nombre maximum de places pour les formations (optionnel, défaut: 20)
+  image?: string // Chemin vers l'image de la formation / du chantier
 }
 
 export interface GalleryImage {
@@ -80,7 +81,7 @@ async function writeData(key: string, value: any): Promise<void> {
 
 export async function getSettings(): Promise<SiteSettings> {
   const defaultSettings: SiteSettings = {
-    chantiersLink: 'https://framaforms.org/chantiers-participatifs-de-plantation-de-haie-1740317429',
+    chantiersLink: 'https://framaforms.org/chantiers-participatifs-1740318243',
     chantiersText: 'S\'inscrire aux chantiers participatifs',
     chantiersEnabled: true,
     coachingsComplete: true,

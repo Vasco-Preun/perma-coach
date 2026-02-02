@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
+import Image from 'next/image'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Section from '@/components/ui/Section'
@@ -277,9 +278,20 @@ export default function InscriptionFormationPage() {
                     {formatDateRange(event.startDate, event.endDate)}
                   </p>
                   {event.description && (
-                    <p className="text-base text-[#1a1a1a]/70 mb-6 leading-relaxed">
+                    <p className="text-base text-[#1a1a1a]/70 mb-4 leading-relaxed">
                       {event.description}
                     </p>
+                  )}
+                  {event.image && (
+                    <div className="relative w-full max-w-md mx-auto aspect-video rounded-2xl overflow-hidden border-2 border-yellow-200 mb-6">
+                      <Image
+                        src={event.image}
+                        alt={event.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 448px"
+                      />
+                    </div>
                   )}
                 </div>
 
@@ -349,6 +361,17 @@ export default function InscriptionFormationPage() {
                   <p className="text-base text-[#1a1a1a]/70 mb-4 leading-relaxed">
                     {event.description}
                   </p>
+                )}
+                {event.image && (
+                  <div className="relative w-full max-w-md mx-auto aspect-video rounded-2xl overflow-hidden border-2 border-green-200 mb-6">
+                    <Image
+                      src={event.image}
+                      alt={event.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 448px"
+                    />
+                  </div>
                 )}
                 <div className="inline-block px-6 py-3 bg-green-50 rounded-2xl border border-green-200 mb-4">
                   <p className="text-3xl font-bold text-green-700">

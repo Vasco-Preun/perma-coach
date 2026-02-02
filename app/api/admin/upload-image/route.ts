@@ -13,6 +13,10 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const file = formData.get('image') as File
     const productType = formData.get('productType') as string || 'legumes'
+    // Dossier de destination : 'boutique' (légumes, graines, plants) ou 'formations'
+    const folder = (formData.get('folder') as string) || 'boutique'
+    const allowedFolders = ['boutique', 'formations']
+    const uploadFolder = allowedFolders.includes(folder) ? folder : 'boutique'
 
     if (!file) {
       return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 })
@@ -39,7 +43,7 @@ export async function POST(request: NextRequest) {
     const filename = `${timestamp}-${originalName}`
 
     // Créer le dossier s'il n'existe pas
-    const uploadDir = join(process.cwd(), 'public', 'images', 'boutique')
+    const uploadDir = join(process.cwd(), 'public', 'images', uploadFolder)
     try {
       await mkdir(uploadDir, { recursive: true })
     } catch (error) {
@@ -51,7 +55,7 @@ export async function POST(request: NextRequest) {
     await writeFile(filepath, buffer)
 
     // Retourner le chemin public
-    const imagePath = `/images/boutique/${filename}`
+    const imagePath = `/images/${uploadFolder}/${filename}`
 
     return NextResponse.json({ 
       success: true, 
