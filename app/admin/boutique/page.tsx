@@ -33,7 +33,7 @@ export default function AdminBoutiquePage() {
   const [saving, setSaving] = useState(false)
   const [password, setPassword] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'info', text: string } | null>(null)
   const [editingProduct, setEditingProduct] = useState<string | null>(null)
   const [showAddForm, setShowAddForm] = useState(false)
   const [formData, setFormData] = useState<ProductForm>({
@@ -184,7 +184,8 @@ export default function AdminBoutiquePage() {
       const data = await response.json().catch(() => ({}))
       if (!response.ok) {
         const msg = data?.error || data?.message || 'Erreur lors de l\'upload'
-        setMessage({ type: 'error', text: msg })
+        const isProductionNotice = response.status === 503 && data?.code === 'UPLOAD_NOT_AVAILABLE_PRODUCTION'
+        setMessage({ type: isProductionNotice ? 'info' : 'error', text: msg })
         return
       }
       setFormData(prev => ({ ...prev, image: data.imagePath }))
@@ -393,8 +394,10 @@ export default function AdminBoutiquePage() {
                 
                 {message && (
                   <div className={`mb-6 p-4 rounded-2xl ${
-                    message.type === 'success' 
-                      ? 'bg-green-50 text-green-800 border border-green-200' 
+message.type === 'success'
+                      ? 'bg-green-50 text-green-800 border border-green-200'
+                      : message.type === 'info'
+                      ? 'bg-blue-50 text-blue-800 border border-blue-200'
                       : 'bg-red-50 text-red-800 border border-red-200'
                   }`}>
                     {message.text}
@@ -485,10 +488,12 @@ export default function AdminBoutiquePage() {
             
             {message && (
               <div className={`mt-4 p-4 rounded-2xl ${
-                message.type === 'success' 
-                  ? 'bg-green-50 text-green-800 border border-green-200' 
-                  : 'bg-red-50 text-red-800 border border-red-200'
-              }`}>
+message.type === 'success'
+                      ? 'bg-green-50 text-green-800 border border-green-200'
+                      : message.type === 'info'
+                      ? 'bg-blue-50 text-blue-800 border border-blue-200'
+                      : 'bg-red-50 text-red-800 border border-red-200'
+                  }`}>
                 {message.text}
               </div>
             )}

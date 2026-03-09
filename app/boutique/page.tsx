@@ -26,6 +26,7 @@ export default function BoutiquePage() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [failedImageIds, setFailedImageIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     loadAllProducts()
@@ -219,17 +220,22 @@ export default function BoutiquePage() {
             ? 'border-green-500 shadow-xl shadow-green-500/10'
             : 'border-green-200/50 hover:border-green-300 shadow-lg hover:shadow-xl'
         } overflow-hidden`}>
-          {product.image && (
-            <div className="relative w-full h-48 md:h-56 flex-shrink-0 overflow-hidden">
+          {product.image && !failedImageIds.has(product.id) ? (
+            <div className="relative w-full h-48 md:h-56 flex-shrink-0 overflow-hidden bg-[#1a1a1a]/5">
               <Image
                 src={product.image}
                 alt={product.name}
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
+                onError={() => setFailedImageIds(prev => new Set(prev).add(product.id))}
               />
             </div>
-          )}
+          ) : product.image && failedImageIds.has(product.id) ? (
+            <div className="w-full h-48 md:h-56 flex-shrink-0 bg-earth-100 flex items-center justify-center">
+              <span className="text-earth-400 text-sm">Image indisponible</span>
+            </div>
+          ) : null}
           <div className="p-6 md:p-8 flex flex-col flex-grow min-h-0">
             <h4 className="text-2xl md:text-3xl font-serif text-[#1a1a1a] mb-3 group-hover:text-green-700 transition-colors">
               {product.name}

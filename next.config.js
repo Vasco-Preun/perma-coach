@@ -3,6 +3,7 @@ const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
+      { protocol: 'https', hostname: '**.public.blob.vercel-storage.com', pathname: '/**' },
       { protocol: 'https', hostname: '**.imgur.com', pathname: '/**' },
       { protocol: 'https', hostname: '**.postimages.org', pathname: '/**' },
       { protocol: 'https', hostname: '**.postimg.cc', pathname: '/**' },

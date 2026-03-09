@@ -50,6 +50,13 @@ ADMIN_PASSWORD=votre_mot_de_passe_securise_ici
 - Mélange de lettres, chiffres et caractères spéciaux
 - Exemple : `P3rm@-C0@ch-2024!`
 
+**Upload de photos (boutique et formations) en production** : pour pouvoir ajouter des photos depuis l’admin sur le site en ligne, créez un **Blob store** Vercel et liez-le au projet :
+1. Dans le projet Vercel → **Storage** → **Create Database** → **Blob**
+2. Donnez un nom au store, choisissez **Public**, puis créez
+3. La variable **BLOB_READ_WRITE_TOKEN** est ajoutée automatiquement au projet. Redéployez si besoin.
+
+Sans cette étape, l’upload de fichiers ne fonctionne qu’en local ; en production il faudra utiliser le champ « URL de l’image » avec un lien externe.
+
 ### 4. Redéploiement
 
 Après avoir ajouté les variables d'environnement :

@@ -1,30 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
+import { put } from '@vercel/blob'
 import { verifyAdminAuth } from '@/lib/auth'
 
 export async function POST(request: NextRequest) {
   try {
-    // Vérifier l'authentification
     if (!verifyAdminAuth(request)) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    // Sur Vercel, le système de fichiers est en lecture seule : l'upload direct n'est pas possible
-    if (process.env.VERCEL) {
-      return NextResponse.json(
-        {
-          error: 'Sur le site en ligne, l\'upload de fichier n\'est pas disponible. Utilisez le champ "URL de l\'image" pour coller un lien vers une image hébergée ailleurs (ex. imgur.com, postimages.org).',
-          code: 'UPLOAD_NOT_AVAILABLE_PRODUCTION',
-        },
-        { status: 503 }
-      )
-    }
-
     const formData = await request.formData()
     const file = formData.get('image') as File
-    const productType = formData.get('productType') as string || 'legumes'
-    // Dossier de destination : 'boutique' (légumes, graines, plants) ou 'formations'
     const folder = (formData.get('folder') as string) || 'boutique'
     const allowedFolders = ['boutique', 'formations']
     const uploadFolder = allowedFolders.includes(folder) ? folder : 'boutique'
@@ -32,51 +19,68 @@ export async function POST(request: NextRequest) {
     if (!file) {
       return NextResponse.json({ error: 'Aucun fichier fourni' }, { status: 400 })
     }
-
-    // Vérifier le type de fichier
     if (!file.type.startsWith('image/')) {
       return NextResponse.json({ error: 'Le fichier doit être une image' }, { status: 400 })
     }
-
-    // Vérifier la taille (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       return NextResponse.json({ error: 'Le fichier est trop volumineux (max 5MB)' }, { status: 400 })
     }
 
-    // Lire le fichier
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-
-    // Générer un nom de fichier unique
     const timestamp = Date.now()
     const originalName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-    const extension = originalName.split('.').pop() || 'jpg'
     const filename = `${timestamp}-${originalName}`
+    const pathname = `${uploadFolder}/${filename}`
 
-    // Créer le dossier s'il n'existe pas
+    // En production (Vercel) sans Blob configuré : indiquer qu'il faut configurer le store
+    if (process.env.VERCEL && !process.env.BLOB_READ_WRITE_TOKEN) {
+      return NextResponse.json(
+        {
+          error: 'Stockage Blob non configuré. Dans le projet Vercel : Storage → Create Blob store (Public), puis redéployez.',
+          code: 'UPLOAD_NOT_AVAILABLE_PRODUCTION',
+        },
+        { status: 503 }
+      )
+    }
+
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN
+    if (blobToken) {
+      const arrayBuffer = await file.arrayBuffer()
+      const blob = await put(pathname, arrayBuffer, {
+        access: 'public',
+        addRandomSuffix: true,
+        contentType: file.type || 'image/jpeg',
+        token: blobToken,
+      })
+      return NextResponse.json({
+        success: true,
+        imagePath: blob.url,
+        message: 'Image uploadée avec succès',
+      })
+    }
+
+    // En local : enregistrer dans public/images/...
+    const bytes = await file.arrayBuffer()
+    const buffer = Buffer.from(bytes)
     const uploadDir = join(process.cwd(), 'public', 'images', uploadFolder)
     try {
       await mkdir(uploadDir, { recursive: true })
-    } catch (error) {
-      // Le dossier existe peut-être déjà
+    } catch {
+      // dossier déjà existant
     }
-
-    // Sauvegarder le fichier
     const filepath = join(uploadDir, filename)
     await writeFile(filepath, buffer)
-
-    // Retourner le chemin public
     const imagePath = `/images/${uploadFolder}/${filename}`
 
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       imagePath,
-      message: 'Image uploadée avec succès'
+      message: 'Image uploadée avec succès',
     })
   } catch (error) {
     console.error('Error uploading image:', error)
+    const message = error instanceof Error ? error.message : 'Erreur inconnue'
     return NextResponse.json(
-      { error: 'Erreur lors de l\'upload de l\'image' },
+      { error: `Erreur lors de l'upload : ${message}` },
       { status: 500 }
     )
   }
