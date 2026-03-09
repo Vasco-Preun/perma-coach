@@ -2,7 +2,11 @@
 const nextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
-    remotePatterns: [],
+    remotePatterns: [
+      { protocol: 'https', hostname: '**.imgur.com', pathname: '/**' },
+      { protocol: 'https', hostname: '**.postimages.org', pathname: '/**' },
+      { protocol: 'https', hostname: '**.postimg.cc', pathname: '/**' },
+    ],
   },
   // Activer le hot reload et le fast refresh
   reactStrictMode: true,

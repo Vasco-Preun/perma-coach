@@ -118,8 +118,11 @@ export default function AdminPage() {
         headers: { 'Authorization': `Bearer ${ADMIN_PASSWORD}` },
         body: formData,
       })
-      const data = await response.json()
-      if (!response.ok) throw new Error(data.error || 'Erreur upload')
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        setMessage({ type: 'error', text: data?.error || data?.message || 'Erreur lors de l\'upload' })
+        return
+      }
       updateEvent(eventId, 'image', data.imagePath)
       setMessage({ type: 'success', text: 'Image ajoutée' })
       setTimeout(() => setMessage(null), 2000)

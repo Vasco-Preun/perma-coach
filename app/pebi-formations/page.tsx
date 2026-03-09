@@ -177,12 +177,12 @@ export default async function PebiFormationsPage() {
                 <span className="inline-block px-4 py-2 bg-gradient-to-r from-earth-100 to-earth-50 rounded-full text-sm font-semibold text-earth-800 mb-4">
                   Accompagnement
                 </span>
-                <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] mb-8 leading-tight">Coachings</h2>
+                <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] mb-8 leading-tight">Coachings en ligne</h2>
               </div>
               
               <div className="space-y-6 text-lg md:text-xl text-[#1a1a1a]/80 leading-relaxed mb-8">
                 <p>
-                  Nos coachings complets offrent un accompagnement personnalisé et approfondi pour vous guider dans votre projet 
+                  Nos coachings en ligne offrent un accompagnement personnalisé et approfondi pour vous guider dans votre projet 
                   de permaculture et d'autonomie. Un suivi sur mesure adapté à vos besoins spécifiques, votre terrain et vos objectifs.
                 </p>
                 <p>
@@ -202,9 +202,9 @@ export default async function PebiFormationsPage() {
                         </svg>
                       </div>
                       <div>
-                        <h3 className="text-xl font-semibold text-[#1a1a1a] mb-2">Coachings complets</h3>
+                        <h3 className="text-xl font-semibold text-[#1a1a1a] mb-2">Coachings en ligne complets</h3>
                         <p className="text-lg font-medium text-[#1a1a1a]">
-                          {settings.coachingsText || 'Les coachings sont complets (plus de places disponibles pour le moment).'}
+                          {settings.coachingsText || 'Les coachings en ligne sont complets (plus de places disponibles pour le moment).'}
                         </p>
                       </div>
                     </div>

@@ -10,6 +10,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
+    // Sur Vercel, le système de fichiers est en lecture seule : l'upload direct n'est pas possible
+    if (process.env.VERCEL) {
+      return NextResponse.json(
+        {
+          error: 'Sur le site en ligne, l\'upload de fichier n\'est pas disponible. Utilisez le champ "URL de l\'image" pour coller un lien vers une image hébergée ailleurs (ex. imgur.com, postimages.org).',
+          code: 'UPLOAD_NOT_AVAILABLE_PRODUCTION',
+        },
+        { status: 503 }
+      )
+    }
+
     const formData = await request.formData()
     const file = formData.get('image') as File
     const productType = formData.get('productType') as string || 'legumes'

@@ -181,11 +181,12 @@ export default function AdminBoutiquePage() {
         body: formData
       })
 
+      const data = await response.json().catch(() => ({}))
       if (!response.ok) {
-        throw new Error('Erreur lors de l\'upload')
+        const msg = data?.error || data?.message || 'Erreur lors de l\'upload'
+        setMessage({ type: 'error', text: msg })
+        return
       }
-
-      const data = await response.json()
       setFormData(prev => ({ ...prev, image: data.imagePath }))
       setMessage({ type: 'success', text: 'Image uploadée avec succès' })
       setTimeout(() => setMessage(null), 2000)
@@ -668,10 +669,10 @@ export default function AdminBoutiquePage() {
                         value={formData.image}
                         onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                         className="w-full px-4 py-2.5 border-2 border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all bg-white text-[#1a1a1a] text-sm"
-                        placeholder="Ou entrez un chemin d'image manuellement (ex: /images/boutique/carotte.jpg)"
+                        placeholder="Ou collez une URL d'image (ex: https://... ou /images/boutique/photo.jpg)"
                       />
                       <p className="text-xs text-[#1a1a1a]/60">
-                        Formats acceptés: JPG, PNG, WebP (max 5MB). Les images seront stockées dans /public/images/boutique/
+                        En local : upload possible. Sur le site en ligne : collez l’URL d’une image hébergée ailleurs (imgur.com, postimages.org, etc.).
                       </p>
                     </div>
                   </div>

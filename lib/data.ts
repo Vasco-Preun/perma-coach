@@ -85,7 +85,7 @@ export async function getSettings(): Promise<SiteSettings> {
     chantiersText: 'S\'inscrire aux chantiers participatifs',
     chantiersEnabled: true,
     coachingsComplete: true,
-    coachingsText: 'Les coachings sont complets (pas de réservation pour le moment).',
+    coachingsText: 'Les coachings en ligne sont complets (pas de réservation pour le moment).',
     thematiques: ['Arbres fruitiers', 'Permaculture', 'Autonomie alimentaire', 'Écosystèmes']
   }
   

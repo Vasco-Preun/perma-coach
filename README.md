@@ -2,6 +2,8 @@
 
 Site web pour Perma-coach - Transmission et permaculture
 
+**Production :** [lesjardinsduclos.com](https://lesjardinsduclos.com) · Projet Vercel : `perma-coach`
+
 ## Stack technique
 
 - **Next.js 14** (App Router) avec TypeScript

@@ -1,5 +1,13 @@
 # Guide de déploiement - Perma-coach
 
+## Projet Vercel
+
+- **Projet Vercel :** `perma-coach`
+- **Domaine :** [lesjardinsduclos.com](https://lesjardinsduclos.com)
+- **GitHub :** [Vasco-Preun/perma-coach](https://github.com/Vasco-Preun/perma-coach)
+
+---
+
 ## Déploiement sur Vercel (recommandé)
 
 ### 1. Préparation
