@@ -25,6 +25,7 @@ const DEFAULT_MAX_PLACES = 20
 export default function PlanningClient({ events: initialEvents }: PlanningClientProps) {
   const [filter, setFilter] = useState<'all' | 'formation' | 'chantier'>('all')
   const [placesAvailability, setPlacesAvailability] = useState<Record<string, PlacesAvailability>>({})
+  const [placesLoading, setPlacesLoading] = useState(true)
   
   const filteredEvents = initialEvents.filter(event => {
     if (filter === 'all') return true
@@ -81,6 +82,7 @@ export default function PlanningClient({ events: initialEvents }: PlanningClient
   useEffect(() => {
     const loadPlaces = async () => {
       try {
+        setPlacesLoading(true)
         const response = await fetch('/api/formations/places')
         if (response.ok) {
           const data = await response.json()
@@ -88,6 +90,8 @@ export default function PlanningClient({ events: initialEvents }: PlanningClient
         }
       } catch (error) {
         console.error('Error loading places:', error)
+      } finally {
+        setPlacesLoading(false)
       }
     }
     loadPlaces()
@@ -197,16 +201,7 @@ export default function PlanningClient({ events: initialEvents }: PlanningClient
                         {getFormationPrice(event)} €
                       </p>
                     )}
-                    {event.type === 'formation' && availability && (
-                      <p className={`text-sm font-medium mt-2 ${
-                        isFull ? 'text-red-600' : 'text-green-700'
-                      }`}>
-                        {isFull 
-                          ? `${maxPlaces}/${maxPlaces} places - Complet` 
-                          : `${availablePlaces}/${maxPlaces} places disponible${availablePlaces > 1 ? 's' : ''}`
-                        }
-                      </p>
-                    )}
+                    {/* On n'affiche pas le détail du nombre de places aux visiteurs */}
                     {!isFull && event.type === 'formation' && (
                       <p className="text-sm text-[#1a1a1a]/60 mt-2">
                         S'inscrire →

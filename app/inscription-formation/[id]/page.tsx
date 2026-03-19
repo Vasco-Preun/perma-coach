@@ -302,7 +302,7 @@ export default function InscriptionFormationPage() {
                         Cette formation est complète
                       </p>
                       <p className="text-base text-yellow-700">
-                        Les {availability?.maxPlaces || DEFAULT_MAX_PLACES} places ont été réservées. Contactez-nous pour être ajouté à la liste d'attente.
+                        Contactez-nous pour être ajouté à la liste d'attente.
                       </p>
                     </div>
                     
@@ -378,13 +378,6 @@ export default function InscriptionFormationPage() {
                     {price} €
                   </p>
                 </div>
-                {availability && (
-                  <div className="inline-block px-4 py-2 bg-blue-50 rounded-xl border border-blue-200">
-                    <p className="text-sm font-semibold text-blue-800">
-                      {availability.available} place{availability.available > 1 ? 's' : ''} disponible{availability.available > 1 ? 's' : ''} sur {availability.maxPlaces || DEFAULT_MAX_PLACES}
-                    </p>
-                  </div>
-                )}
               </div>
 
               <div className="grid lg:grid-cols-3 gap-8">
