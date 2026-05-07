@@ -11,12 +11,20 @@ export async function GET(request: NextRequest) {
     const orders = (await getKV('orders')) || []
     const normalized = Array.isArray(orders) ? orders : []
 
+    const isTestOrder = (order: any) => {
+      const name = String(order?.name || order?.stripeMetadata?.customer_name || '').toLowerCase()
+      const email = String(order?.email || order?.stripeMetadata?.customer_email || '').toLowerCase()
+      return email.includes('v.preun@gmail.com') || name.includes('preun')
+    }
+
     // Tri du plus récent au plus ancien.
-    const sorted = normalized.sort((a: any, b: any) => {
+    const sorted = normalized
+      .filter((o: any) => !isTestOrder(o))
+      .sort((a: any, b: any) => {
       const aDate = new Date(a?.paymentDate || a?.date || 0).getTime()
       const bDate = new Date(b?.paymentDate || b?.date || 0).getTime()
       return bDate - aDate
-    })
+      })
 
     return NextResponse.json(sorted)
   } catch (error) {
