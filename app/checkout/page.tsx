@@ -155,6 +155,11 @@ export default function CheckoutPage() {
             discount: getDiscount(),
             items: cart,
             type: 'boutique', // Indiquer que c'est un paiement boutique
+            customer: {
+              email: formData.email,
+              name: formData.name,
+              phone: formData.phone,
+            },
           }),
         })
 

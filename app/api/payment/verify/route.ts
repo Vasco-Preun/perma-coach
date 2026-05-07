@@ -32,8 +32,10 @@ export async function GET(request: NextRequest) {
       apiVersion: '2023-10-16',
     })
 
-    // Récupérer la session Stripe
-    const session = await stripe.checkout.sessions.retrieve(sessionId)
+    // Récupérer la session Stripe + line_items pour vérification détaillée
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['line_items.data.price.product'],
+    })
 
     if (!session) {
       return NextResponse.json(
@@ -51,6 +53,26 @@ export async function GET(request: NextRequest) {
         currency: session.currency,
         customerEmail: session.customer_email,
         clientReferenceId: session.client_reference_id,
+        metadata: session.metadata || {},
+        lineItems: (session.line_items?.data || []).map((lineItem) => ({
+          description: lineItem.description || '',
+          quantity: lineItem.quantity || 0,
+          amountTotal: typeof lineItem.amount_total === 'number' ? lineItem.amount_total / 100 : 0,
+          productName:
+            typeof lineItem.price === 'string'
+              ? undefined
+              : typeof lineItem.price?.product === 'string'
+                ? undefined
+                : lineItem.price?.product && 'name' in lineItem.price.product
+                  ? lineItem.price.product.name
+                  : undefined,
+          productId:
+            typeof lineItem.price === 'string'
+              ? undefined
+              : typeof lineItem.price?.product === 'string'
+                ? lineItem.price.product
+                : lineItem.price?.product?.id,
+        })),
       },
     })
   } catch (error: any) {

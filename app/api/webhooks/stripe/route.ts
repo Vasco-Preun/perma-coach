@@ -92,9 +92,37 @@ async function handleWebhookEvent(
     const session = event.data.object as Stripe.Checkout.Session
     
     if (session.payment_status === 'paid') {
-      const orderId = session.client_reference_id || session.metadata?.orderId
+      const orderId = session.client_reference_id || session.metadata?.order_id || session.metadata?.orderId
       
       if (orderId) {
+        // Récupérer la session complète + line_items pour tracer précisément ce qui a été acheté
+        const sessionWithItems = await stripe.checkout.sessions.retrieve(session.id, {
+          expand: ['line_items.data.price.product'],
+        })
+
+        const lineItems = sessionWithItems.line_items?.data || []
+        const purchasedItems = lineItems.map((line) => ({
+          description: line.description || '',
+          quantity: line.quantity || 0,
+          amount_total: typeof line.amount_total === 'number' ? line.amount_total / 100 : 0,
+          amount_subtotal: typeof line.amount_subtotal === 'number' ? line.amount_subtotal / 100 : 0,
+          price_id: typeof line.price === 'string' ? line.price : line.price?.id,
+          product_id:
+            typeof line.price === 'string'
+              ? undefined
+              : typeof line.price?.product === 'string'
+                ? line.price.product
+                : line.price?.product?.id,
+          product_name:
+            typeof line.price === 'string'
+              ? undefined
+              : typeof line.price?.product === 'string'
+                ? undefined
+                : line.price?.product && 'name' in line.price.product
+                  ? line.price.product.name
+                  : undefined,
+        }))
+
         // Mettre à jour le statut de la commande
         const orders = await getKV('orders') || []
         const orderIndex = orders.findIndex((o: any) => o.id === orderId)
@@ -108,10 +136,34 @@ async function handleWebhookEvent(
             stripePaymentIntentId: typeof session.payment_intent === 'string' 
               ? session.payment_intent 
               : session.payment_intent?.id,
+            stripeAccountType: accountType,
+            stripeMetadata: sessionWithItems.metadata || {},
+            stripeLineItems: purchasedItems,
+            purchasedProductName:
+              sessionWithItems.metadata?.product_name ||
+              purchasedItems.map((i) => i.product_name || i.description).filter(Boolean).join(', '),
+            purchasedFormationName: sessionWithItems.metadata?.formation_name || '',
+            customerEmail:
+              sessionWithItems.metadata?.customer_email ||
+              sessionWithItems.customer_details?.email ||
+              sessionWithItems.customer_email ||
+              orders[orderIndex]?.email ||
+              '',
+            amountPaid:
+              typeof sessionWithItems.amount_total === 'number'
+                ? sessionWithItems.amount_total / 100
+                : orders[orderIndex]?.total || 0,
           }
           
           await setKV('orders', orders)
-          console.log(`Commande ${orderId} marquée comme payée (${accountType})`)
+          console.log(`Commande ${orderId} payée (${accountType})`, {
+            product: orders[orderIndex].purchasedProductName,
+            formation: orders[orderIndex].purchasedFormationName,
+            email: orders[orderIndex].customerEmail,
+            amount: orders[orderIndex].amountPaid,
+            metadata: sessionWithItems.metadata || {},
+            lineItems: purchasedItems,
+          })
           
           // Envoyer un email uniquement après confirmation du paiement
           try {

@@ -183,6 +183,11 @@ export default function InscriptionFormationPage() {
           type: 'formation',
           eventId: eventId,
           eventTitle: event?.title,
+          customer: {
+            email: formData.email,
+            name: formData.name,
+            phone: formData.phone,
+          },
         }),
       })
 

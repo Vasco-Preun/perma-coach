@@ -229,6 +229,15 @@ export default function AdminPage() {
                   Gérer la boutique
                 </Button>
                 <Button
+                  as="a"
+                  href="/admin/commandes"
+                  variant="outline"
+                  size="lg"
+                  className="border-green-700 text-green-700 hover:bg-green-50"
+                >
+                  Suivi commandes
+                </Button>
+                <Button
                   onClick={saveEvents}
                   disabled={loading}
                   size="lg"

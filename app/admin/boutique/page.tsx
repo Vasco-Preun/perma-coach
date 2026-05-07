@@ -476,6 +476,14 @@ message.type === 'success'
                   </span>
                 </div>
                 <Button
+                  as="a"
+                  href="/admin/commandes"
+                  variant="outline"
+                  className="border-green-700 text-green-700 hover:bg-green-50"
+                >
+                  Suivi commandes
+                </Button>
+                <Button
                   onClick={saveAll}
                   disabled={saving}
                   size="lg"

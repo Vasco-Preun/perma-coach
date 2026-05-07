@@ -3,7 +3,15 @@ import Stripe from 'stripe'
 
 export async function POST(request: NextRequest) {
   try {
-    const { orderId, amount, items, type, eventId, eventTitle } = await request.json()
+    const {
+      orderId,
+      amount,
+      items,
+      type,
+      eventId,
+      eventTitle,
+      customer,
+    } = await request.json()
 
     // Déterminer quel compte Stripe utiliser selon le type de paiement
     const isFormation = type === 'formation'
@@ -46,6 +54,10 @@ export async function POST(request: NextRequest) {
             product_data: {
               name: eventTitle || 'Formation',
               description: `Inscription à la formation${eventId ? ` (ID: ${eventId})` : ''}`,
+              metadata: {
+                formation_id: eventId || '',
+                formation_name: eventTitle || 'Formation',
+              },
             },
             unit_amount: Math.round(amount * 100), // Convertir en centimes
           },
@@ -62,6 +74,11 @@ export async function POST(request: NextRequest) {
             description: item.type === 'legume' || item.type === 'graine' || item.type === 'plant'
               ? `${item.type === 'legume' ? 'Légume' : item.type === 'graine' ? 'Graine' : 'Plant'}${item.category ? ` - ${item.category}` : ''}${item.unit ? ` (${item.unit})` : ''}`
               : undefined,
+            metadata: {
+              product_id: item.id || '',
+              product_name: item.name || '',
+              product_type: item.type || '',
+            },
           },
           unit_amount: Math.round((item.price || 0) * 100), // Convertir en centimes
         },
@@ -103,6 +120,11 @@ export async function POST(request: NextRequest) {
     
     console.log('Creating Stripe session with URLs:', { successUrl, cancelUrl, baseUrl, env: process.env.NODE_ENV })
     
+    const firstItem = Array.isArray(items) && items.length > 0 ? items[0] : null
+    const customerEmail = customer?.email || null
+    const customerName = customer?.name || null
+    const customerPhone = customer?.phone || null
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
@@ -110,10 +132,17 @@ export async function POST(request: NextRequest) {
       success_url: successUrl,
       cancel_url: cancelUrl,
       client_reference_id: orderId,
+      ...(customerEmail ? { customer_email: customerEmail } : {}),
       metadata: {
-        orderId: orderId,
-        type: isFormation ? 'formation' : 'boutique',
-        ...(isFormation && eventId ? { eventId } : {}),
+        order_id: orderId,
+        payment_type: isFormation ? 'formation' : 'boutique',
+        product_id: !isFormation ? (firstItem?.id || '') : '',
+        product_name: !isFormation ? (firstItem?.name || '') : '',
+        formation_name: isFormation ? (eventTitle || '') : '',
+        customer_email: customerEmail || '',
+        customer_name: customerName || '',
+        customer_phone: customerPhone || '',
+        event_id: isFormation && eventId ? eventId : '',
       },
     })
     
