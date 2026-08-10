@@ -14,11 +14,11 @@ import GoogleMap from '@/components/GoogleMap'
 import { getSettings, getEvents } from '@/lib/data'
 
 export const metadata: Metadata = {
-  title: 'Méthode PEBI / Formations & Coachings - Perma-coach',
-  description: 'Découvrez la méthode PEBI et nos formations en permaculture et autonomie',
+  title: 'Formation Potager & Permaculture - Perma-coach',
+  description: 'En deux jours, apprenez à construire un potager plus simple, plus productif et adapté à votre réalité.',
   openGraph: {
-    title: 'Méthode PEBI / Formations & Coachings - Perma-coach',
-    description: 'Découvrez la méthode PEBI et nos formations en permaculture et autonomie',
+    title: 'Formation Potager & Permaculture - Perma-coach',
+    description: 'En deux jours, apprenez à construire un potager plus simple, plus productif et adapté à votre réalité.',
   },
 }
 
@@ -40,8 +40,14 @@ export default async function PebiFormationsPage() {
           <VideoBackground src="/waste.mp4" />
           <div className="container-custom relative z-10 w-full">
             <Hero
-              title="Méthode PEBI"
-              subtitle="Formations & Coachings pour se reconnecter à la terre"
+              title={
+                <>
+                  FORMATION POTAGER & PERMACULTURE
+                  <br />
+                  Arrêtez de jardiner au hasard.
+                </>
+              }
+              subtitle="En deux jours, apprenez à construire un potager plus simple, plus productif et adapté à votre réalité."
             />
           </div>
         </section>
@@ -53,25 +59,27 @@ export default async function PebiFormationsPage() {
             <ScrollReveal direction="up">
               <div className="mb-6">
                 <span className="inline-block px-4 py-2 bg-gradient-to-r from-green-100 to-green-50 rounded-full text-sm font-semibold text-green-800 mb-4">
-                  Notre méthode
+                  ÉTAPE 1 · VOS DIFFICULTÉS
                 </span>
                 <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] mb-8 leading-tight">
-                  La méthode PEBI
+                  Cette formation est faite pour vous si...
                 </h2>
               </div>
               <div className="space-y-6 text-xl text-[#1a1a1a]/80 leading-relaxed">
                 <p className="text-lg md:text-xl">
-                  La méthode PEBI (Permaculture, Écosystèmes, Biodiversité, Innovation) est une approche holistique
-                  qui allie les principes de la permaculture à une compréhension profonde des écosystèmes naturels.
+                  <strong className="text-[#1a1a1a]">Vos planches sont pleines... mais votre panier reste vide.</strong>{' '}
+                  Vous semez et plantez beaucoup, sans récolter assez par rapport au temps et à la surface mobilisés.
                 </p>
                 <p className="text-lg md:text-xl">
-                  Elle vise à créer des systèmes résilients, autonomes et productifs en s'inspirant des modèles naturels
-                  et en respectant les cycles et les interactions entre les différents éléments.
+                  <strong className="text-[#1a1a1a]">Vous connaissez plein d&apos;astuces... mais vous n&apos;avez pas de système.</strong>{' '}
+                  Vous accumulez les conseils sans savoir quoi appliquer, dans quel ordre ni au bon moment.
                 </p>
                 <p className="text-lg md:text-xl">
-                  Cette méthode s'appuie sur l'observation, la patience et la transmission de savoir-faire traditionnels
-                  et modernes pour accompagner chacun vers une plus grande autonomie alimentaire et une reconnexion
-                  authentique à la terre.
+                  <strong className="text-[#1a1a1a]">Vous ratez les bons créneaux et le potager tourne au ralenti.</strong>{' '}
+                  Les semis sont lancés trop tard et les planches restent vides entre deux cultures.
+                  <br /><br />
+                  <strong className="text-[#1a1a1a]">Vous récoltez trop d&apos;un coup... puis presque plus rien.</strong>{' '}
+                  Votre production arrive par vagues au lieu de remplir régulièrement votre panier.
                 </p>
               </div>
             </ScrollReveal>
@@ -85,23 +93,20 @@ export default async function PebiFormationsPage() {
             <ScrollReveal direction="up">
               <div className="mb-6">
                 <span className="inline-block px-4 py-2 bg-gradient-to-r from-earth-100 to-earth-50 rounded-full text-sm font-semibold text-earth-800 mb-4">
-                  Formations
+                  ÉTAPE 2 · POURQUOI APPRENDRE AVEC MOI ?
                 </span>
-                <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] mb-8 leading-tight">Nos formations</h2>
+                <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] mb-8 leading-tight">Je n&apos;enseigne que ce que je cultive.</h2>
               </div>
               
               <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
                 {/* Colonne gauche : Texte */}
                 <div className="space-y-6 text-lg md:text-xl text-[#1a1a1a]/80 leading-relaxed">
                   <p>
-                    Nos formations en permaculture et autonomie sont conçues pour vous donner les bases pratiques et théoriques 
-                    nécessaires à votre projet. Que vous soyez débutant ou que vous souhaitiez approfondir vos connaissances, 
-                    nos formations s'adaptent à votre niveau et à vos objectifs.
+                    Ce que je vous transmets est appliqué chaque jour à la ferme-école Les Jardins du Clos.
                   </p>
                   <p>
-                    Chaque formation allie théorie et pratique, avec des temps d'observation, d'expérimentation et d'échange 
-                    pour une compréhension approfondie. Vous apprendrez à observer votre environnement, à comprendre les interactions 
-                    entre les différents éléments, et à concevoir des systèmes durables et productifs.
+                    <strong className="text-[#1a1a1a]">Je cultive depuis plus de 10 ans.</strong>{' '}
+                    J&apos;ai testé, observé et amélioré mes pratiques au fil des saisons, des réussites comme des erreurs.
                   </p>
                 </div>
                 
@@ -115,47 +120,45 @@ export default async function PebiFormationsPage() {
                         </svg>
                       </div>
                       <div>
-                        <h3 className="text-2xl font-serif text-[#1a1a1a] mb-2">Formations en présentiel</h3>
+                        <h3 className="text-2xl font-serif text-[#1a1a1a] mb-2">Je suis maraîcher, pas seulement formateur</h3>
                         <p className="text-lg text-[#1a1a1a]/70 mb-3">
-                          <strong className="text-green-700">Durée : 2 à 4 jours</strong>
+                          <strong className="text-green-700">Je produis les légumes aux Jardins du Clos et je les vends directement en circuit court.</strong>
                         </p>
                         
                         {/* Tarifs */}
                         <div className="mb-4 p-4 bg-gradient-to-br from-green-100 to-green-50 rounded-2xl border border-green-200/50">
-                          <h4 className="text-lg font-semibold text-[#1a1a1a] mb-3">Tarifs</h4>
+                          <h4 className="text-lg font-semibold text-[#1a1a1a] mb-3">J&apos;ai créé une méthode claire et structurée</h4>
                           <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                              <span className="text-base text-[#1a1a1a]/80">Formation de 2 jours</span>
-                              <span className="text-xl font-bold text-green-700">200 €</span>
+                              <span className="text-base text-[#1a1a1a]/80">La méthode PEBI aide à mieux organiser les cultures, récolter davantage et éviter les planches vides.</span>
+                              <span className="text-xl font-bold text-green-700">03</span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-base text-[#1a1a1a]/80">Formation de 4 jours</span>
-                              <span className="text-xl font-bold text-green-700">500 €</span>
+                              <span className="text-base text-[#1a1a1a]/80">J&apos;accompagne déjà des jardiniers vers plus d&apos;autonomie</span>
+                              <span className="text-xl font-bold text-green-700">04</span>
                             </div>
                           </div>
                         </div>
                         
                         <p className="text-base text-[#1a1a1a]/70 mb-4">
-                          Nos formations se déroulent en présentiel sur notre site, au cœur de notre écosystème en construction. 
-                          Vous serez immergé dans un environnement réel où vous pourrez observer, toucher, expérimenter et apprendre 
-                          directement sur le terrain.
+                          Mes formations et coachings permettent de comprendre son potager et de gagner en confiance.
                         </p>
                         <div className="space-y-2 text-sm text-[#1a1a1a]/70">
                           <div className="flex items-start gap-2">
                             <span className="text-green-600 mt-1">•</span>
-                            <span><strong>Théorie et pratique</strong> : alternance entre apports théoriques et mise en pratique immédiate</span>
+                            <span><strong>Mon travail est suivi et reconnu</strong> : je partage mon expérience à travers mes formations, mes contenus et mes chroniques, mais ma légitimité reste le terrain.</span>
                           </div>
                           <div className="flex items-start gap-2">
                             <span className="text-green-600 mt-1">•</span>
-                            <span><strong>Observation sur le terrain</strong> : découverte de notre écosystème et de ses interactions</span>
+                            <span><strong>Je cultive depuis plus de 10 ans</strong> : j&apos;ai testé, observé et amélioré mes pratiques au fil des saisons</span>
                           </div>
                           <div className="flex items-start gap-2">
                             <span className="text-green-600 mt-1">•</span>
-                            <span><strong>Échanges et partage</strong> : temps de discussion et d'échange d'expériences</span>
+                            <span><strong>Je suis maraîcher, pas seulement formateur</strong> : je produis les légumes aux Jardins du Clos en circuit court</span>
                           </div>
                           <div className="flex items-start gap-2">
                             <span className="text-green-600 mt-1">•</span>
-                            <span><strong>Support pédagogique</strong> : documentation et ressources pour continuer votre apprentissage</span>
+                            <span><strong>J&apos;ai créé une méthode claire et structurée</strong> : la méthode PEBI organise les cultures semaine après semaine</span>
                           </div>
                         </div>
                       </div>
@@ -175,19 +178,29 @@ export default async function PebiFormationsPage() {
             <ScrollReveal direction="up">
               <div className="mb-6">
                 <span className="inline-block px-4 py-2 bg-gradient-to-r from-earth-100 to-earth-50 rounded-full text-sm font-semibold text-earth-800 mb-4">
-                  Accompagnement
+                  ÉTAPE 3 · LA RÉPONSE PEBI
                 </span>
-                <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] mb-8 leading-tight">Coachings en ligne</h2>
+                <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] mb-8 leading-tight">À chaque blocage, une solution concrète.</h2>
               </div>
               
               <div className="space-y-6 text-lg md:text-xl text-[#1a1a1a]/80 leading-relaxed mb-8">
                 <p>
-                  Nos coachings en ligne offrent un accompagnement personnalisé et approfondi pour vous guider dans votre projet 
-                  de permaculture et d'autonomie. Un suivi sur mesure adapté à vos besoins spécifiques, votre terrain et vos objectifs.
+                  La méthode PEBI transforme vos difficultés en un système simple à appliquer dans votre potager.
                 </p>
                 <p>
-                  Que vous souhaitiez créer votre potager, transformer votre terrain, ou développer votre autonomie alimentaire, 
-                  nos coachings vous accompagnent de la conception à la mise en œuvre de votre projet.
+                  <strong className="text-[#1a1a1a]">RÉPONSE AU PROBLÈME 01 — Mieux utiliser chaque planche pour récolter davantage.</strong>{' '}
+                  Vous apprenez à combiner cultures étagées, associations et successions pour exploiter l&apos;espace sans surcharger la planche.
+                  <br /><br />
+                  <strong className="text-[#1a1a1a]">RÉPONSE AU PROBLÈME 02 — Suivre une méthode claire, semaine après semaine.</strong>{' '}
+                  Vous savez quoi semer, planter, surveiller et récolter, avec des priorités précises plutôt qu&apos;une accumulation d&apos;astuces.
+                  <br /><br />
+                  <strong className="text-[#1a1a1a]">RÉPONSE AU PROBLÈME 03 — Anticiper et enchaîner les cultures sans laisser de vide.</strong>{' '}
+                  Vous préparez la culture suivante avant la fin de la précédente grâce à la planification, aux semis échelonnés et à la pépinière.
+                  <br /><br />
+                  <strong className="text-[#1a1a1a]">RÉPONSE AU PROBLÈME 04 — Échelonner les récoltes pour produire plus régulièrement.</strong>{' '}
+                  Vous adaptez les quantités et la fréquence des semis pour éviter les surplus d&apos;un côté et les longues périodes sans récolte de l&apos;autre.
+                  <br /><br />
+                  Le résultat : un potager organisé pour produire davantage, plus régulièrement, sans vous demander chaque semaine ce que vous devez faire.
                 </p>
               </div>
 
@@ -251,11 +264,11 @@ export default async function PebiFormationsPage() {
             <ScrollReveal direction="up">
               <div className="mb-6">
                 <span className="inline-block px-4 py-2 bg-gradient-to-r from-earth-100 to-earth-50 rounded-full text-sm font-semibold text-earth-800 mb-4">
-                  Calendrier
+                  ÉTAPE 4 · PASSEZ À L&apos;ACTION
                 </span>
-                <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] mb-4 leading-tight">Planning</h2>
+                <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] mb-4 leading-tight">Deux jours pour reprendre le contrôle de votre potager.</h2>
                 <p className="text-lg text-[#1a1a1a]/70 mb-12">
-                  Programme évolutif avec une visibilité prévue jusqu'à <strong className="text-green-700">juillet 2026</strong>
+                  ✓ 2 journées complètes · ✓ Petit groupe · ✓ Théorie + pratique · ✓ Sur une vraie ferme · ✓ Accessible aux débutants · ✓ Solutions adaptées à votre projet
                 </p>
               </div>
               <PlanningClient events={events} />
@@ -275,10 +288,10 @@ export default async function PebiFormationsPage() {
                   </span>
                 </div>
                 <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] mb-6 leading-tight">
-                  Inscrivez-vous à nos formations !
+                  Prêt à arrêter de jardiner au hasard ?
                 </h2>
                 <p className="text-xl text-[#1a1a1a]/70 mb-10">
-                  Contactez-nous pour réserver votre place ou obtenir plus d'informations
+                  Réservez votre place et repartez avec une méthode claire, des gestes concrets et un plan d&apos;action adapté à votre potager. Places volontairement limitées pour préserver les échanges.
                 </p>
                 <ParallaxSection speed={0.2}>
                   <Button
@@ -287,7 +300,7 @@ export default async function PebiFormationsPage() {
                     size="lg"
                     className="bg-gradient-to-r from-green-700 to-green-600 text-white shadow-2xl hover:shadow-3xl"
                   >
-                    Inscrivez-vous à nos formations !
+                    Je réserve ma place maintenant
                   </Button>
                 </ParallaxSection>
               </div>
