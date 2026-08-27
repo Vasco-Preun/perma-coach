@@ -98,7 +98,7 @@ export default function PlanningClient({ events: initialEvents }: PlanningClient
   }, [])
 
   const getFormationAvailability = (eventId: string): PlacesAvailability | null => {
-    return placesAvailability[eventId] || null
+    return placesAvailability[String(eventId).trim()] || null
   }
 
   const filters = [

@@ -4,6 +4,25 @@ import { getEvents } from '@/lib/data'
 
 const DEFAULT_MAX_PLACES = 20
 
+function normalizeEventId(eventId: unknown): string {
+  return String(eventId).trim()
+}
+
+function isTestOrder(order: any): boolean {
+  const name = String(order?.name || order?.stripeMetadata?.customer_name || '').toLowerCase()
+  const email = String(order?.email || order?.stripeMetadata?.customer_email || '').toLowerCase()
+  return email.includes('v.preun@gmail.com') || name.includes('preun')
+}
+
+function isReservedFormationOrder(order: any): boolean {
+  return (
+    order?.type === 'formation' &&
+    order?.eventId &&
+    order?.status === 'paid' &&
+    !isTestOrder(order)
+  )
+}
+
 async function getOrders(): Promise<any[]> {
   const orders = await getKV('orders')
   return orders || []
@@ -20,19 +39,17 @@ export async function GET() {
     const maxPlacesByFormation: Record<string, number> = {}
     events.forEach((event) => {
       if (event.type === 'formation') {
-        maxPlacesByFormation[event.id] = event.maxPlaces || DEFAULT_MAX_PLACES
+        maxPlacesByFormation[normalizeEventId(event.id)] = event.maxPlaces || DEFAULT_MAX_PLACES
       }
     })
     
-    // Compter les inscriptions par formation (eventId)
+    // Compter uniquement les inscriptions payées (confirmées) par formation
     const placesByFormation: Record<string, number> = {}
     
     orders.forEach((order: any) => {
-      if (order.type === 'formation' && order.eventId) {
-        if (!placesByFormation[order.eventId]) {
-          placesByFormation[order.eventId] = 0
-        }
-        placesByFormation[order.eventId]++
+      if (isReservedFormationOrder(order)) {
+        const eventId = normalizeEventId(order.eventId)
+        placesByFormation[eventId] = (placesByFormation[eventId] || 0) + 1
       }
     })
     
@@ -53,13 +70,16 @@ export async function GET() {
     
     // Ajouter aussi les formations sans réservations
     events.forEach((event) => {
-      if (event.type === 'formation' && !availability[event.id]) {
-        const maxPlaces = event.maxPlaces || DEFAULT_MAX_PLACES
-        availability[event.id] = {
-          reserved: 0,
-          available: maxPlaces,
-          isFull: false,
-          maxPlaces
+      if (event.type === 'formation') {
+        const eventId = normalizeEventId(event.id)
+        if (!availability[eventId]) {
+          const maxPlaces = event.maxPlaces || DEFAULT_MAX_PLACES
+          availability[eventId] = {
+            reserved: 0,
+            available: maxPlaces,
+            isFull: false,
+            maxPlaces
+          }
         }
       }
     })

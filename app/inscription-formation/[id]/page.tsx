@@ -70,8 +70,9 @@ export default function InscriptionFormationPage() {
         
         if (placesResponse.ok) {
           const places = await placesResponse.json()
-          if (places[eventId]) {
-            setAvailability(places[eventId])
+          const normalizedEventId = String(eventId).trim()
+          if (places[normalizedEventId]) {
+            setAvailability(places[normalizedEventId])
           }
         }
       } catch (error) {
