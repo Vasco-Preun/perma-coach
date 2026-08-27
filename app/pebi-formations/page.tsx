@@ -215,38 +215,7 @@ export default async function PebiFormationsPage() {
           </div>
         </Section>
 
-        {/* Planning */}
-        <Section padding="xl" background="off-white" snap id="planning" className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(42,115,73,0.05),transparent_50%)]" />
-          <div className="container-custom max-w-4xl relative z-10">
-            <ScrollReveal direction="up">
-              <div className="mb-6">
-                <span className="inline-block px-4 py-2 bg-gradient-to-r from-earth-100 to-earth-50 rounded-full text-sm font-semibold text-earth-800 mb-4">
-                  ÉTAPE 4 · PASSEZ À L&apos;ACTION
-                </span>
-                <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] mb-4 leading-tight">Deux jours pour reprendre le contrôle de votre potager.</h2>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-base text-[#1a1a1a]/70 mb-12 max-w-3xl">
-                  {[
-                    '2 journées complètes',
-                    'Petit groupe',
-                    'Théorie + pratique',
-                    'Sur une vraie ferme',
-                    'Accessible aux débutants',
-                    'Solutions adaptées à votre projet',
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 leading-relaxed">
-                      <span className="text-green-600 mt-0.5 flex-shrink-0">✓</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <PlanningClient events={events} />
-            </ScrollReveal>
-          </div>
-        </Section>
-
-        {/* Coachings */}
+        {/* ÉTAPE 3 · LA RÉPONSE PEBI */}
         <Section padding="xl" background="white" className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-green-50/30 via-white to-earth-50/20" />
           <div className="container-custom max-w-4xl relative z-10">
@@ -258,7 +227,7 @@ export default async function PebiFormationsPage() {
                 <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] mb-8 leading-tight">À chaque blocage, une solution concrète.</h2>
               </div>
               
-              <div className="space-y-8 mb-8">
+              <div className="space-y-8">
                 <p className="text-lg md:text-xl text-[#1a1a1a]/80 leading-relaxed">
                   La méthode PEBI transforme vos difficultés en un système simple à appliquer dans votre potager.
                 </p>
@@ -308,9 +277,47 @@ export default async function PebiFormationsPage() {
                   un potager organisé pour produire davantage, plus régulièrement, sans vous demander chaque semaine ce que vous devez faire.
                 </p>
               </div>
+            </ScrollReveal>
+          </div>
+        </Section>
 
-              {/* Mention coachings complets - Mise en avant */}
-              {settings.coachingsComplete && (
+        {/* ÉTAPE 4 · PASSEZ À L'ACTION */}
+        <Section padding="xl" background="off-white" snap id="planning" className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(42,115,73,0.05),transparent_50%)]" />
+          <div className="container-custom max-w-4xl relative z-10">
+            <ScrollReveal direction="up">
+              <div className="mb-6">
+                <span className="inline-block px-4 py-2 bg-gradient-to-r from-earth-100 to-earth-50 rounded-full text-sm font-semibold text-earth-800 mb-4">
+                  ÉTAPE 4 · PASSEZ À L&apos;ACTION
+                </span>
+                <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] mb-4 leading-tight">Deux jours pour reprendre le contrôle de votre potager.</h2>
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-base text-[#1a1a1a]/70 mb-12 max-w-3xl">
+                  {[
+                    '2 journées complètes',
+                    'Petit groupe',
+                    'Théorie + pratique',
+                    'Sur une vraie ferme',
+                    'Accessible aux débutants',
+                    'Solutions adaptées à votre projet',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2 leading-relaxed">
+                      <span className="text-green-600 mt-0.5 flex-shrink-0">✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <PlanningClient events={events} />
+            </ScrollReveal>
+          </div>
+        </Section>
+
+        {/* Coachings */}
+        {settings.coachingsComplete && (
+          <Section padding="xl" background="white" className="relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-50/30 via-white to-earth-50/20" />
+            <div className="container-custom max-w-4xl relative z-10">
+              <ScrollReveal direction="up">
                 <ParallaxSection speed={0.2}>
                   <GlassCard className="bg-gradient-to-br from-yellow-50 to-yellow-100/50 border-yellow-300/50 border-2">
                     <div className="flex items-start gap-4">
@@ -328,10 +335,10 @@ export default async function PebiFormationsPage() {
                     </div>
                   </GlassCard>
                 </ParallaxSection>
-              )}
-            </ScrollReveal>
-          </div>
-        </Section>
+              </ScrollReveal>
+            </div>
+          </Section>
+        )}
 
         {/* Carte Google Maps */}
         <Section padding="xl" background="white" snap className="relative overflow-hidden">
