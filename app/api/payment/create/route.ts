@@ -124,6 +124,12 @@ export async function POST(request: NextRequest) {
     const customerEmail = customer?.email || null
     const customerName = customer?.name || null
     const customerPhone = customer?.phone || null
+    const allProductNames = Array.isArray(items)
+      ? items
+          .map((item: any) => `${item?.name || 'Article'} × ${item?.quantity || 1}`)
+          .join(', ')
+          .slice(0, 499)
+      : ''
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -137,7 +143,7 @@ export async function POST(request: NextRequest) {
         order_id: orderId,
         payment_type: isFormation ? 'formation' : 'boutique',
         product_id: !isFormation ? (firstItem?.id || '') : '',
-        product_name: !isFormation ? (firstItem?.name || '') : '',
+        product_name: !isFormation ? (allProductNames || firstItem?.name || '') : '',
         formation_name: isFormation ? (eventTitle || '') : '',
         customer_email: customerEmail || '',
         customer_name: customerName || '',

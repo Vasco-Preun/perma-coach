@@ -1,24 +1,32 @@
 import { Resend } from 'resend'
 
+interface OrderItem {
+  name?: string
+  type?: string
+  price?: number
+  quantity?: number
+  category?: string
+  unit?: string
+  product_name?: string
+  description?: string
+}
+
 interface OrderData {
   id: string
   name: string
   email: string
   phone: string
-  pickupType: 'farm' | 'delivery'
+  pickupType?: 'farm' | 'delivery' | string
   pickupDate?: string
   address?: string
-  items: Array<{
-    name: string
-    type: string
-    price: number
-    quantity: number
-    category?: string
-    unit?: string
-  }>
-  subtotal: number
-  discount: number
-  total: number
+  type?: string
+  eventTitle?: string
+  purchasedFormationName?: string
+  items?: OrderItem[]
+  stripeLineItems?: OrderItem[]
+  subtotal?: number
+  discount?: number
+  total?: number
   notes?: string
   date: string
   status?: string
@@ -29,24 +37,43 @@ export async function sendOrderEmail(order: OrderData) {
     // Initialiser Resend avec la clé API
     const resend = new Resend(process.env.RESEND_API_KEY)
 
-    // Formater les items de la commande
-    const itemsList = order.items.map(item => {
-      const itemInfo = [
-        `  • ${item.name}`,
-        `    Type: ${item.type}`,
-        `    Quantité: ${item.quantity}`,
-        `    Prix unitaire: ${item.price.toFixed(2)}€`,
-        `    Prix total: ${(item.price * item.quantity).toFixed(2)}€`,
-      ]
-      if (item.category) itemInfo.push(`    Catégorie: ${item.category}`)
-      if (item.unit) itemInfo.push(`    Unité: ${item.unit}`)
-      return itemInfo.join('\n')
-    }).join('\n\n')
+    const orderItems: OrderItem[] = Array.isArray(order.items) && order.items.length > 0
+      ? order.items
+      : Array.isArray(order.stripeLineItems)
+        ? order.stripeLineItems
+        : []
 
-    // Formater le mode de récupération
+    const formatPrice = (value?: number) => (Number(value) || 0).toFixed(2)
+    const formationName = order.purchasedFormationName || order.eventTitle || ''
+
+    // Formater les items de la commande
+    const itemsList = orderItems.length > 0
+      ? orderItems.map(item => {
+          const name = item.name || item.product_name || item.description || 'Article'
+          const quantity = item.quantity || 1
+          const price = Number(item.price) || 0
+          const itemInfo = [
+            `  • ${name}`,
+            item.type ? `    Type: ${item.type}` : '',
+            `    Quantité: ${quantity}`,
+            price ? `    Prix unitaire: ${formatPrice(price)}€` : '',
+            price ? `    Prix total: ${formatPrice(price * quantity)}€` : '',
+          ].filter(Boolean)
+          if (item.category) itemInfo.push(`    Catégorie: ${item.category}`)
+          if (item.unit) itemInfo.push(`    Unité: ${item.unit}`)
+          return itemInfo.join('\n')
+        }).join('\n\n')
+      : formationName
+        ? `  • ${formationName}`
+        : '  (aucun détail d\'article disponible)'
+
     const pickupInfo = order.pickupType === 'farm'
       ? `Récupération à la ferme\nLa Chapelle Lasson, 20 rue Saint Fiacre`
-      : `Livraison à Reims${order.address ? `\nAdresse: ${order.address}` : ''}`
+      : order.pickupType === 'delivery'
+        ? `Livraison à Reims${order.address ? `\nAdresse: ${order.address}` : ''}`
+        : formationName
+          ? `Inscription formation : ${formationName}`
+          : 'Mode de récupération non précisé'
 
     // Créer le contenu de l'email
     const emailSubject = `Nouvelle commande #${order.id} - ${order.name}`
@@ -79,9 +106,9 @@ ${itemsList}
 RÉCAPITULATIF
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Sous-total: ${order.subtotal.toFixed(2)}€
-Remise: ${order.discount.toFixed(2)}€
-TOTAL: ${order.total.toFixed(2)}€
+Sous-total: ${formatPrice(order.subtotal)}€
+Remise: ${formatPrice(order.discount)}€
+TOTAL: ${formatPrice(order.total)}€
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${order.notes ? `NOTES\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n${order.notes}\n\n` : ''}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -116,20 +143,25 @@ Statut: ${order.status || 'En attente'}
 
           <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #1a1a1a; margin-top: 0;">Commande</h3>
-            ${order.items.map(item => `
+            ${orderItems.length > 0 ? orderItems.map(item => {
+              const name = item.name || item.product_name || item.description || 'Article'
+              const quantity = item.quantity || 1
+              const price = Number(item.price) || 0
+              return `
               <div style="margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #e5e7eb;">
-                <p style="margin: 5px 0;"><strong>${item.name}</strong></p>
-                <p style="margin: 5px 0; color: #6b7280; font-size: 14px;">Type: ${item.type} | Quantité: ${item.quantity} | Prix unitaire: ${item.price.toFixed(2)}€</p>
-                <p style="margin: 5px 0; color: #16a34a; font-weight: bold;">Prix total: ${(item.price * item.quantity).toFixed(2)}€</p>
+                <p style="margin: 5px 0;"><strong>${name}</strong></p>
+                <p style="margin: 5px 0; color: #6b7280; font-size: 14px;">${item.type ? `Type: ${item.type} | ` : ''}Quantité: ${quantity}${price ? ` | Prix unitaire: ${formatPrice(price)}€` : ''}</p>
+                ${price ? `<p style="margin: 5px 0; color: #16a34a; font-weight: bold;">Prix total: ${formatPrice(price * quantity)}€</p>` : ''}
               </div>
-            `).join('')}
+            `
+            }).join('') : `<p>${formationName || 'Aucun détail d\'article disponible'}</p>`}
           </div>
 
           <div style="background-color: #dcfce7; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a;">
             <h3 style="color: #1a1a1a; margin-top: 0;">Récapitulatif</h3>
-            <p><strong>Sous-total:</strong> ${order.subtotal.toFixed(2)}€</p>
-            <p><strong>Remise:</strong> ${order.discount.toFixed(2)}€</p>
-            <p style="font-size: 18px; font-weight: bold; color: #16a34a; margin-top: 10px;"><strong>TOTAL: ${order.total.toFixed(2)}€</strong></p>
+            <p><strong>Sous-total:</strong> ${formatPrice(order.subtotal)}€</p>
+            <p><strong>Remise:</strong> ${formatPrice(order.discount)}€</p>
+            <p style="font-size: 18px; font-weight: bold; color: #16a34a; margin-top: 10px;"><strong>TOTAL: ${formatPrice(order.total)}€</strong></p>
           </div>
 
           ${order.notes ? `

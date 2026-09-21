@@ -128,8 +128,19 @@ async function handleWebhookEvent(
         const orderIndex = orders.findIndex((o: any) => o.id === orderId)
         
         if (orderIndex !== -1) {
+          const existingItems = Array.isArray(orders[orderIndex].items) ? orders[orderIndex].items : []
+          const itemsSummary = existingItems
+            .map((item: any) => `${item?.name || 'Article'} × ${item?.quantity || 1}`)
+            .filter(Boolean)
+            .join(', ')
+          const stripeItemsSummary = purchasedItems
+            .map((i) => i.product_name || i.description)
+            .filter(Boolean)
+            .join(', ')
+
           orders[orderIndex] = {
             ...orders[orderIndex],
+            items: existingItems,
             status: 'paid',
             paymentDate: new Date().toISOString(),
             stripeSessionId: session.id,
@@ -140,8 +151,9 @@ async function handleWebhookEvent(
             stripeMetadata: sessionWithItems.metadata || {},
             stripeLineItems: purchasedItems,
             purchasedProductName:
+              itemsSummary ||
               sessionWithItems.metadata?.product_name ||
-              purchasedItems.map((i) => i.product_name || i.description).filter(Boolean).join(', '),
+              stripeItemsSummary,
             purchasedFormationName: sessionWithItems.metadata?.formation_name || '',
             customerEmail:
               sessionWithItems.metadata?.customer_email ||

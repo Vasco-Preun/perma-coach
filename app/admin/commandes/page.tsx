@@ -16,23 +16,79 @@ interface StripeLineItem {
   product_name?: string
 }
 
+interface OrderItem {
+  id?: string
+  name?: string
+  type?: string
+  category?: string
+  price?: number
+  unit?: string
+  quantity?: number
+}
+
+interface DisplayLineItem {
+  name: string
+  quantity: number
+  price?: number
+  unit?: string
+  type?: string
+  category?: string
+}
+
 interface AdminOrder {
   id: string
   type?: 'formation' | 'boutique'
   status?: string
   name?: string
   email?: string
+  phone?: string
   total?: number
   amount?: number
   amountPaid?: number
   date?: string
   paymentDate?: string
+  pickupType?: 'farm' | 'delivery' | string
+  pickupDate?: string
+  notes?: string
   eventTitle?: string
   purchasedFormationName?: string
   purchasedProductName?: string
+  items?: OrderItem[]
   stripeSessionId?: string
   stripeMetadata?: Record<string, string>
   stripeLineItems?: StripeLineItem[]
+}
+
+function productTypeLabel(type?: string) {
+  if (type === 'legume') return 'Légume'
+  if (type === 'graine') return 'Graine'
+  if (type === 'plant') return 'Plant'
+  return type || ''
+}
+
+function getOrderLineItems(order: AdminOrder): DisplayLineItem[] {
+  if (Array.isArray(order.items) && order.items.length > 0) {
+    return order.items.map((item) => ({
+      name: item.name || 'Article',
+      quantity: item.quantity || 1,
+      price: item.price,
+      unit: item.unit,
+      type: item.type,
+      category: item.category,
+    }))
+  }
+
+  if (Array.isArray(order.stripeLineItems) && order.stripeLineItems.length > 0) {
+    return order.stripeLineItems.map((item) => ({
+      name: item.product_name || item.description || 'Article',
+      quantity: item.quantity || 1,
+      price: typeof item.amount_total === 'number' && item.quantity
+        ? item.amount_total / item.quantity
+        : item.amount_total,
+    }))
+  }
+
+  return []
 }
 
 export default function AdminCommandesPage() {
@@ -40,7 +96,7 @@ export default function AdminCommandesPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [orders, setOrders] = useState<AdminOrder[]>([])
   const [loading, setLoading] = useState(false)
-  const [statusFilter, setStatusFilter] = useState<OrderStatus>('all')
+  const [statusFilter, setStatusFilter] = useState<OrderStatus>('paid')
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'lesjardinsduclos26'
@@ -130,7 +186,7 @@ export default function AdminCommandesPage() {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
                 <h1 className="text-3xl md:text-4xl font-serif text-[#1a1a1a] mb-2">Suivi commandes & paiements</h1>
-                <p className="text-[#1a1a1a]/70">Vue centralisée des paiements Stripe (produits, formations, email, montant)</p>
+                <p className="text-[#1a1a1a]/70">Par défaut, uniquement les commandes payées à préparer (détail des produits, client, montant)</p>
               </div>
               <div className="flex items-center gap-3">
                 <Button as="a" href="/admin" variant="outline" className="border-green-700 text-green-700 hover:bg-green-50">
@@ -149,8 +205,8 @@ export default function AdminCommandesPage() {
 
         <Section padding="xl" background="off-white">
           <div className="container-custom max-w-6xl">
-            <div className="flex gap-2 mb-6">
-              {(['all', 'paid', 'pending'] as OrderStatus[]).map((status) => (
+            <div className="flex flex-wrap items-center gap-2 mb-6">
+              {(['paid', 'pending', 'all'] as OrderStatus[]).map((status) => (
                 <button
                   key={status}
                   onClick={() => setStatusFilter(status)}
@@ -165,6 +221,15 @@ export default function AdminCommandesPage() {
               ))}
             </div>
 
+            {statusFilter === 'paid' && (
+              <p className="mb-4 text-sm text-[#1a1a1a]/70">
+                Ces commandes ont été payées. Ce sont celles à préparer.
+                {orders.filter((o) => (o.status || 'pending') !== 'paid').length > 0 && (
+                  <> Les commandes en attente de paiement sont masquées.</>
+                )}
+              </p>
+            )}
+
             {message && (
               <div className="mb-6 p-4 rounded-2xl bg-red-50 text-red-800 border border-red-200">
                 {message.text}
@@ -173,7 +238,13 @@ export default function AdminCommandesPage() {
 
             {filteredOrders.length === 0 ? (
               <GlassCard className="bg-white/80 backdrop-blur-sm border-green-200/50 text-center py-12">
-                <p className="text-[#1a1a1a]/70">Aucune commande à afficher.</p>
+                <p className="text-[#1a1a1a]/70">
+                  {statusFilter === 'paid'
+                    ? 'Aucune commande payée pour le moment.'
+                    : statusFilter === 'pending'
+                      ? 'Aucune commande en attente de paiement.'
+                      : 'Aucune commande à afficher.'}
+                </p>
               </GlassCard>
             ) : (
               <div className="space-y-4">
@@ -181,8 +252,14 @@ export default function AdminCommandesPage() {
                   const customerEmail = order.email || order.stripeMetadata?.customer_email || '-'
                   const formationName = order.purchasedFormationName || order.eventTitle || order.stripeMetadata?.formation_name
                   const productName = order.purchasedProductName || order.stripeMetadata?.product_name
+                  const lineItems = getOrderLineItems(order)
                   const amount = order.amountPaid ?? order.total ?? order.amount ?? 0
                   const status = order.status || 'pending'
+                  const pickupLabel = order.pickupType === 'delivery'
+                    ? 'Livraison à Reims'
+                    : order.pickupType === 'farm'
+                      ? 'Récupération à la ferme'
+                      : ''
                   return (
                     <GlassCard key={order.id} className="bg-white/90 backdrop-blur-sm border-green-200/50">
                       <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
@@ -203,7 +280,21 @@ export default function AdminCommandesPage() {
 
                           <p className="text-sm text-[#1a1a1a]">
                             <strong>Client :</strong> {order.name || '-'} · <strong>Email :</strong> {customerEmail}
+                            {order.phone ? <> · <strong>Tél :</strong> {order.phone}</> : null}
                           </p>
+
+                          {(pickupLabel || order.pickupDate) && (
+                            <p className="text-sm text-[#1a1a1a]">
+                              {pickupLabel && <><strong>Récupération :</strong> {pickupLabel}</>}
+                              {pickupLabel && order.pickupDate ? ' · ' : null}
+                              {order.pickupDate && (
+                                <>
+                                  <strong>Date :</strong>{' '}
+                                  {new Date(order.pickupDate).toLocaleDateString('fr-FR')}
+                                </>
+                              )}
+                            </p>
+                          )}
 
                           {formationName && (
                             <p className="text-sm text-[#1a1a1a]">
@@ -211,24 +302,40 @@ export default function AdminCommandesPage() {
                             </p>
                           )}
 
-                          {productName && (
+                          {lineItems.length > 0 ? (
+                            <div className="text-sm text-[#1a1a1a]">
+                              <strong>Articles :</strong>
+                              <ul className="mt-1 space-y-1 text-[#1a1a1a]/80">
+                                {lineItems.map((item, idx) => {
+                                  const details = [
+                                    productTypeLabel(item.type),
+                                    item.category,
+                                    item.unit,
+                                  ].filter(Boolean).join(' · ')
+                                  const unitPrice = typeof item.price === 'number' ? item.price : null
+                                  const lineTotal = unitPrice !== null ? unitPrice * item.quantity : null
+                                  return (
+                                    <li key={`${order.id}-${idx}`}>
+                                      - {item.name} × {item.quantity}
+                                      {unitPrice !== null ? ` (${unitPrice.toFixed(2)} €)` : ''}
+                                      {lineTotal !== null ? ` — ${lineTotal.toFixed(2)} €` : ''}
+                                      {details ? ` · ${details}` : ''}
+                                    </li>
+                                  )
+                                })}
+                              </ul>
+                            </div>
+                          ) : productName ? (
                             <p className="text-sm text-[#1a1a1a]">
                               <strong>Produit(s) :</strong> {productName}
                             </p>
-                          )}
+                          ) : null}
 
-                          {Array.isArray(order.stripeLineItems) && order.stripeLineItems.length > 0 && (
-                            <div className="text-sm text-[#1a1a1a]">
-                              <strong>Détail ligne(s) Stripe :</strong>
-                              <ul className="mt-1 space-y-1 text-[#1a1a1a]/80">
-                                {order.stripeLineItems.map((item, idx) => (
-                                  <li key={`${order.id}-${idx}`}>
-                                    - {(item.product_name || item.description || 'Article')} × {item.quantity || 1}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
+                          {order.notes ? (
+                            <p className="text-sm text-[#1a1a1a]/80">
+                              <strong>Notes :</strong> {order.notes}
+                            </p>
+                          ) : null}
                         </div>
 
                         <div className="lg:text-right space-y-1">

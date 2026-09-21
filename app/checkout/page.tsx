@@ -119,6 +119,7 @@ export default function CheckoutPage() {
     try {
       const order = {
         ...formData,
+        type: 'boutique' as const,
         pickupType: finalPickupType, // Utiliser le type final (peut avoir été forcé à 'farm')
         items: cart,
         subtotal: getSubtotal(),
