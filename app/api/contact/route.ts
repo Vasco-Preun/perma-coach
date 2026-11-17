@@ -43,19 +43,30 @@ export async function POST(request: NextRequest) {
       }),
     })
     const result = await response.json().catch(() => null)
+    // Log only predefined categories, never provider text or submitted fields.
+    const providerMessage = typeof result?.message === 'string' ? result.message : ''
+    const reason = /activat|activé|actived/i.test(providerMessage) ? 'activation'
+      : /web server|html files|referer|referrer|origin/i.test(providerMessage) ? 'form-origin'
+      : /captcha|robot|bot|spam/i.test(providerMessage) ? 'anti-spam'
+      : /rate|too many|limit/i.test(providerMessage) ? 'rate-limit'
+      : /email address|email.*valid/i.test(providerMessage) ? 'recipient'
+      : result === null ? 'non-json-response' : 'provider-rejected'
     const activationRequired = typeof result?.message === 'string' && /activat|activé|actived/i.test(result.message)
     if (activationRequired) {
+      console.error('Contact FormSubmit:', { status: response.status, reason: 'activation' })
       return NextResponse.json({ error: 'Le formulaire attend son activation par le propriétaire. Contactez-nous directement à permacoach51@gmail.com.' }, { status: 503 })
     }
     // FormSubmit can return HTTP 200 with success set to the string "false".
     if (!response.ok || (result?.success !== true && result?.success !== 'true')) {
+      console.error('Contact FormSubmit:', { status: response.status, reason })
       return NextResponse.json({ error: saved
         ? 'Votre demande a été enregistrée, mais la notification email a échoué. Contactez-nous à permacoach51@gmail.com.'
-        : 'L’envoi n’a pas pu être confirmé. Contactez-nous à permacoach51@gmail.com.' }, { status: 502 })
+        : 'L’envoi n’a pas pu être confirmé. Contactez-nous à permacoach51@gmail.com.', diagnostic: reason }, { status: 502 })
     }
     return NextResponse.json({ success: true })
-  } catch {
-    console.error('Contact: envoi ou sauvegarde indisponible')
+  } catch (error) {
+    const reason = error instanceof Error && error.name === 'TimeoutError' ? 'timeout' : 'network-or-storage'
+    console.error('Contact FormSubmit:', { reason })
     return NextResponse.json({ error: saved
       ? 'Votre demande a été enregistrée, mais la notification email a échoué. Contactez-nous à permacoach51@gmail.com.'
       : 'L’envoi n’a pas pu être confirmé. Contactez-nous à permacoach51@gmail.com.' }, { status: 502 })
