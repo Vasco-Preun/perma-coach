@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { scaleIn } from '@/lib/animations'
 import Button from '@/components/ui/Button'
 
@@ -14,7 +14,7 @@ interface ContactFormData {
   consent: boolean
 }
 
-export default function ContactForm() {
+export default function ContactForm({ onSubmit }: { onSubmit?: (data: ContactFormData) => Promise<void> }) {
   const [formData, setFormData] = useState<ContactFormData>({
     name: '',
     email: '',
@@ -23,18 +23,48 @@ export default function ContactForm() {
     message: '',
     consent: false,
   })
+  const [submitError, setSubmitError] = useState('Une erreur est survenue. Veuillez réessayer.')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus('idle')
+
+    try {
+      if (onSubmit) {
+        await onSubmit(formData)
+      } else {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        })
+
+        if (!response.ok) {
+          const result = await response.json().catch(() => ({}))
+          throw new Error(result.error || 'Envoi indisponible. Contactez-nous directement par email.')
+        }
+      }
+      setSubmitStatus('success')
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '', consent: false })
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Envoi indisponible. Contactez-nous directement par email.')
+      setSubmitStatus('error')
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <motion.form
-      action="https://formsubmit.co/permacoach51@gmail.com"
-      method="POST"
+      onSubmit={handleSubmit}
       className="space-y-6 max-w-2xl mx-auto"
       initial="hidden"
       animate="visible"
       variants={scaleIn}
     >
-      <input type="hidden" name="_subject" value={formData.subject || "Nouveau message depuis le site"} />
-      <input type="hidden" name="_url" value="https://www.lesjardinsduclos.com/contact" />
-      <input type="hidden" name="_template" value="table" />
       <div>
         <label htmlFor="name" className="block text-sm font-medium text-[#1a1a1a] mb-2">
           Nom complet *
@@ -42,7 +72,6 @@ export default function ContactForm() {
         <input
           type="text"
           id="name"
-          name="name"
           required
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -57,7 +86,6 @@ export default function ContactForm() {
         <input
           type="email"
           id="email"
-          name="email"
           required
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -72,7 +100,6 @@ export default function ContactForm() {
         <input
           type="tel"
           id="phone"
-          name="phone"
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
           className="w-full px-4 py-3 border border-earth-200 rounded-2xl focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all bg-white text-[#1a1a1a]"
@@ -86,7 +113,6 @@ export default function ContactForm() {
         <input
           type="text"
           id="subject"
-          name="subject"
           value={formData.subject}
           onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
           placeholder="Ex: Formation permaculture, Chantier participatif..."
@@ -100,7 +126,6 @@ export default function ContactForm() {
         </label>
         <textarea
           id="message"
-          name="message"
           required
           rows={5}
           value={formData.message}
@@ -113,7 +138,6 @@ export default function ContactForm() {
         <input
           type="checkbox"
           id="consent"
-          name="consent"
           required
           checked={formData.consent}
           onChange={(e) => setFormData({ ...formData, consent: e.target.checked })}
@@ -124,16 +148,37 @@ export default function ContactForm() {
         </label>
       </div>
 
-      <p className="text-sm text-[#1a1a1a]/70">
-        Vous allez être redirigé vers FormSubmit pour terminer l’envoi.
-      </p>
+      <AnimatePresence mode="wait">
+        {submitStatus === 'success' && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="p-4 bg-green-50 text-green-800 rounded-2xl border border-green-200"
+          >
+            Message envoyé avec succès ! Nous vous recontacterons bientôt.
+          </motion.div>
+        )}
+
+        {submitStatus === 'error' && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="p-4 bg-red-50 text-red-800 rounded-2xl border border-red-200"
+          >
+            {submitError}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Button
         type="submit"
+        disabled={isSubmitting}
         size="lg"
         className="w-full"
       >
-        Envoyer
+        {isSubmitting ? 'Envoi en cours...' : 'Envoyer'}
       </Button>
     </motion.form>
   )

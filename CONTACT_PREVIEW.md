@@ -1,29 +1,27 @@
-# Prévisualisation : envoi direct FormSubmit
+# Prévisualisation : contact avec Resend
 
-Branche fix/contact-email. Aucune fusion ni promotion en production sans accord explicite.
+Branche fix/contact-email. Production inchangée, publication soumise à accord explicite.
 
-## Motif et comportement
-Le test réel du relais serveur Vercel a obtenu HTTP 403 avec une réponse non JSON de FormSubmit. La cause précise de ce refus n’est pas connue.
-Les formulaires de contact (également présent sur la page chantiers-participatifs) et d’inscription chantier utilisent désormais un formulaire HTML POST envoyé directement par le navigateur à https://formsubmit.co/permacoach51@gmail.com, conformément au mode standard documenté par FormSubmit.
-Ils comportent les attributs name indispensables à la transmission des champs, ainsi qu’un sujet, le consentement et une URL canonique. Les inscriptions transmettent aussi leur identifiant de chantier.
-La page FormSubmit prend le relais pour les vérifications antispam, l’activation éventuelle et la confirmation. Le site n’affiche plus de succès local supposé. La réception réelle reste à vérifier avec le propriétaire.
-La protection reCAPTCHA FormSubmit n’est pas désactivée.
+## État
+FormSubmit n’est plus utilisé par les formulaires. Les tests réels ont rencontré un refus HTTP 403 côté serveur et un timeout HTTP 522 côté navigateur ; aucune réception n’a été confirmée par le propriétaire.
+Le code revient à Resend avec expéditeur configurable et vérifié. Les formulaires restent sur le site et affichent une erreur en cas d’échec. Le nom, email, téléphone, sujet, message et consentement sont validés côté serveur.
 
-## Conséquence pour l’administration
-Les nouvelles demandes passent directement par FormSubmit : elles ne sont plus ajoutées à la collection contacts de l’administration, en prévisualisation comme après une éventuelle mise en production.
-L’ancien endpoint /api/contact renvoie 410 pour inviter les pages anciennes à être rechargées ; il ne transmet rien et n’accède à aucun stockage.
-Les contacts déjà enregistrés ne sont ni lus ni modifiés. Les paiements et les autres emails du site restent hors périmètre.
+## Configuration restante
+1. Dans Resend, ajouter notifications.lesjardinsduclos.com pour l’envoi uniquement.
+2. Copier les enregistrements EXACTS proposés par Resend (sur la capture actuelle : un TXT DKIM et deux CNAME). Ne pas reconstituer les valeurs tronquées.
+3. Le propriétaire ajoute ces enregistrements dans la zone DNS OVH lesjardinsduclos.com. Ne pas modifier les enregistrements du site, les serveurs DNS ou les MX existants de messagerie. Vérifier les noms déjà présents avant ajout. Pas de partage de mot de passe nécessaire.
+4. Attendre Verified dans Resend.
+5. Dans Vercel, configurer CONTACT_FROM_EMAIL = Perma-coach <contact@notifications.lesjardinsduclos.com> et confirmer que la clé RESEND_API_KEY existante appartient au bon compte et peut envoyer depuis ce sous-domaine. Ne jamais partager la clé dans le chat.
+6. Déployer en Preview, tester un seul message fictif, confirmer la réception avec le propriétaire et vérifier qu’il peut répondre au testeur.
+7. Demander accord explicite avant fusion ou promotion en production. Vérifier ensuite le domaine public.
 
-## Validation
-Le test contact-route.test.cjs utilise Playwright contre un serveur local sur le port 3100 et intercepte TOUS les envois vers FormSubmit. Il vérifie la sérialisation réelle des deux formulaires, le blocage sans consentement, le destinataire, le sujet, l’identifiant chantier, l’absence d’appel au relais serveur et la navigation vers la réponse simulée du fournisseur. Aucun email n’est envoyé par ce test.
-Playwright doit être disponible dans l’environnement de test.
+## Données
+En Vercel Preview, /api/contact ne lit et n’écrit aucun contact enregistré. Après publication autorisée, la sauvegarde de nouvelles demandes utilise le mécanisme de production existant avant l’envoi.
+Aucune donnée client existante n’a été consultée ou modifiée. Les paiements et les emails liés aux commandes ne sont pas modifiés.
+Un succès signifie que Resend a retourné un identifiant de message ; il faut toujours confirmer la réception réelle.
 
-## Validation réelle restante
-1. Attendre Ready pour le nouveau commit dans Vercel Preview, puis ouvrir Visit.
-2. Envoyer un seul message fictif et suivre les instructions affichées par FormSubmit.
-3. Le propriétaire active le formulaire depuis sa boîte permacoach51@gmail.com si demandé.
-4. Après activation, vérifier la réception complète d’un second test et la possibilité de répondre au testeur.
-5. La production et la prévisualisation ont des adresses différentes : ne pas garantir que l’activation se transfère entre elles. Vérifier également le fonctionnement sur le domaine public après toute publication autorisée.
-6. Présenter ces résultats et la conséquence pour l’administration avant de demander l’accord explicite de mise en production.
+## Validation locale
+12 tests simulés couvrent : succès, refus, panne réseau, identifiant absent, saisie invalide, JSON invalide, clé absente, expéditeur absent, expéditeur resend.dev refusé, sauvegarde impossible, isolation Preview et chantier.
+TypeScript et build Next.js réussis. Aucun email réel envoyé pendant ces vérifications.
 
-Sources : https://formsubmit.co/documentation et https://formsubmit.co/help
+Documentation : https://resend.com/docs/dashboard/domains/introduction

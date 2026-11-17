@@ -22,6 +22,9 @@ export default function InscriptionChantierPage() {
     message: '',
     consent: false,
   })
+  const [submitError, setSubmitError] = useState('Une erreur est survenue. Veuillez réessayer.')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -63,6 +66,38 @@ export default function InscriptionChantierPage() {
     }
     
     return `${startDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })} - ${endDate.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+    setSubmitStatus('idle')
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          subject: `Inscription au chantier : ${event?.title || ''}`,
+          eventId: eventId,
+          eventType: 'chantier',
+        }),
+      })
+
+      if (!response.ok) {
+          const result = await response.json().catch(() => ({}))
+          throw new Error(result.error || 'Envoi indisponible. Contactez-nous directement par email.')
+        }
+      
+      setSubmitStatus('success')
+      setFormData({ name: '', email: '', phone: '', message: '', consent: false })
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Envoi indisponible. Contactez-nous directement par email.')
+      setSubmitStatus('error')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (loading) {
@@ -132,12 +167,7 @@ export default function InscriptionChantierPage() {
               </div>
 
               <GlassCard className="bg-white/95 backdrop-blur-sm border-earth-200/50 shadow-xl">
-                <form action="https://formsubmit.co/permacoach51@gmail.com" method="POST" className="space-y-6">
-                  <input type="hidden" name="_subject" value={`Inscription au chantier : ${event.title}`} />
-                  <input type="hidden" name="_url" value="https://www.lesjardinsduclos.com/contact" />
-                  <input type="hidden" name="_template" value="table" />
-                  <input type="hidden" name="eventId" value={eventId} />
-                  <input type="hidden" name="eventType" value="chantier" />
+                <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-semibold text-[#1a1a1a] mb-2">
                       Nom complet *
@@ -145,7 +175,6 @@ export default function InscriptionChantierPage() {
                     <input
                       type="text"
                       id="name"
-                      name="name"
                       required
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -160,7 +189,6 @@ export default function InscriptionChantierPage() {
                     <input
                       type="email"
                       id="email"
-                      name="email"
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -175,7 +203,6 @@ export default function InscriptionChantierPage() {
                     <input
                       type="tel"
                       id="phone"
-                      name="phone"
                       required
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
@@ -189,7 +216,6 @@ export default function InscriptionChantierPage() {
                     </label>
                     <textarea
                       id="message"
-                      name="message"
                       required
                       rows={6}
                       value={formData.message}
@@ -202,7 +228,6 @@ export default function InscriptionChantierPage() {
                     <input
                       type="checkbox"
                       id="consent"
-                      name="consent"
                       required
                       checked={formData.consent}
                       onChange={(e) => setFormData({ ...formData, consent: e.target.checked })}
@@ -213,16 +238,25 @@ export default function InscriptionChantierPage() {
                     </label>
                   </div>
 
-                  <p className="text-sm text-[#1a1a1a]/70">
-                    Vous allez être redirigé vers FormSubmit pour terminer l’envoi.
-                  </p>
+                  {submitStatus === 'success' && (
+                    <div className="p-4 bg-green-50 text-green-800 rounded-2xl border border-green-200">
+                      Votre demande d'inscription a été envoyée avec succès ! Nous vous recontacterons bientôt à l'adresse {formData.email || 'indiquée'}.
+                    </div>
+                  )}
+
+                  {submitStatus === 'error' && (
+                    <div className="p-4 bg-red-50 text-red-800 rounded-2xl border border-red-200">
+                      {submitError}
+                    </div>
+                  )}
 
                   <Button
                     type="submit"
+                    disabled={isSubmitting}
                     size="lg"
                     className="w-full bg-earth-700 hover:bg-earth-800 text-white"
                   >
-                    Envoyer ma demande d’inscription
+                    {isSubmitting ? 'Envoi en cours...' : 'Envoyer ma demande d\'inscription'}
                   </Button>
                 </form>
               </GlassCard>
