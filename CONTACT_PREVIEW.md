@@ -1,37 +1,29 @@
-# Prévisualisation du formulaire FormSubmit
+# Prévisualisation : envoi direct FormSubmit
 
-Branche : fix/contact-email. Ne pas fusionner dans main ni promouvoir en production sans accord explicite.
+Branche fix/contact-email. Aucune fusion ni promotion en production sans accord explicite.
 
-## Fonctionnement
-Les contacts et inscriptions chantier utilisent /api/contact, qui transmet des champs explicitement sélectionnés à https://formsubmit.co/ajax/permacoach51@gmail.com.
-Aucune configuration DNS OVH, clé Resend ou CONTACT_FROM_EMAIL n’est nécessaire pour ces deux formulaires.
-Les autres emails du site ne sont pas concernés.
+## Motif et comportement
+Le test réel du relais serveur Vercel a obtenu HTTP 403 avec une réponse non JSON de FormSubmit. La cause précise de ce refus n’est pas connue.
+Les formulaires de contact (également présent sur la page chantiers-participatifs) et d’inscription chantier utilisent désormais un formulaire HTML POST envoyé directement par le navigateur à https://formsubmit.co/permacoach51@gmail.com, conformément au mode standard documenté par FormSubmit.
+Ils comportent les attributs name indispensables à la transmission des champs, ainsi qu’un sujet, le consentement et une URL canonique. Les inscriptions transmettent aussi leur identifiant de chantier.
+La page FormSubmit prend le relais pour les vérifications antispam, l’activation éventuelle et la confirmation. Le site n’affiche plus de succès local supposé. La réception réelle reste à vérifier avec le propriétaire.
+La protection reCAPTCHA FormSubmit n’est pas désactivée.
 
-Le propriétaire doit activer le formulaire depuis l’email FormSubmit reçu dans permacoach51@gmail.com. Tant que le service demande une activation, l’interface affiche un avertissement.
-Le formulaire utilise une URL canonique stable : https://www.lesjardinsduclos.com/contact.
-Une réponse HTTP 200 ne suffit pas : le serveur exige success égal à true ou "true", et traite séparément les demandes d’activation.
-Un succès indique l’acceptation par FormSubmit ; la réception en boîte mail doit être vérifiée par le propriétaire.
-
-## Protection des contacts existants
-En environnement Vercel Preview (VERCEL_ENV=preview), /api/contact ne lit et n’écrit jamais la collection contacts. Les tests sur cette branche ne sont donc pas enregistrés dans l’administration.
-En production, le mécanisme de sauvegarde existant est conservé avant la transmission. Aucun contact existant n’a été consulté ou modifié pendant le travail.
-Les paiements restent hors périmètre.
+## Conséquence pour l’administration
+Les nouvelles demandes passent directement par FormSubmit : elles ne sont plus ajoutées à la collection contacts de l’administration, en prévisualisation comme après une éventuelle mise en production.
+L’ancien endpoint /api/contact renvoie 410 pour inviter les pages anciennes à être rechargées ; il ne transmet rien et n’accède à aucun stockage.
+Les contacts déjà enregistrés ne sont ni lus ni modifiés. Les paiements et les autres emails du site restent hors périmètre.
 
 ## Validation
-`node contact-route.test.cjs` couvre 14 scénarios avec réseau et stockage simulés : succès booléen et chaîne, refus chaîne "false", erreur HTTP, panne réseau, JSON de réponse invalide, réponse ambiguë, activation avec deux valeurs de succès, saisie invalide, JSON de requête invalide, sauvegarde impossible, chantier et absence totale d’accès au stockage en Preview.
-Aucun email réel n’est envoyé par ces tests.
+Le test contact-route.test.cjs utilise Playwright contre un serveur local sur le port 3100 et intercepte TOUS les envois vers FormSubmit. Il vérifie la sérialisation réelle des deux formulaires, le blocage sans consentement, le destinataire, le sujet, l’identifiant chantier, l’absence d’appel au relais serveur et la navigation vers la réponse simulée du fournisseur. Aucun email n’est envoyé par ce test.
+Playwright doit être disponible dans l’environnement de test.
 
-## Prochaine étape
-1. Attendre le statut Ready du nouveau commit sur Vercel Preview.
-2. Vérifier le rendu de /contact, puis convenir avec le propriétaire d’un unique message fictif de test.
-3. Le propriétaire clique sur le lien d’activation FormSubmit s’il le reçoit ; ne pas soumettre plusieurs fois en attendant cette activation.
-4. Effectuer ensuite un nouveau test fictif et confirmer la réception ainsi que la réponse à l’adresse du testeur.
-5. Demander l’accord explicite avant toute fusion ou promotion en production.
+## Validation réelle restante
+1. Attendre Ready pour le nouveau commit dans Vercel Preview, puis ouvrir Visit.
+2. Envoyer un seul message fictif et suivre les instructions affichées par FormSubmit.
+3. Le propriétaire active le formulaire depuis sa boîte permacoach51@gmail.com si demandé.
+4. Après activation, vérifier la réception complète d’un second test et la possibilité de répondre au testeur.
+5. La production et la prévisualisation ont des adresses différentes : ne pas garantir que l’activation se transfère entre elles. Vérifier également le fonctionnement sur le domaine public après toute publication autorisée.
+6. Présenter ces résultats et la conséquence pour l’administration avant de demander l’accord explicite de mise en production.
 
-Documentation officielle :
-- https://formsubmit.co/ajax-documentation
-- https://formsubmit.co/help
-
-## Limites
-L’envoi réel, l’activation et la réception ne sont pas encore validés. FormSubmit reçoit les données des futures demandes pour les transmettre au propriétaire. Sa FAQ indique une conservation des soumissions pendant 30 jours.
-Un échec email après sauvegarde en production peut entraîner un doublon si le visiteur soumet à nouveau ; l’interface explique que la demande est déjà enregistrée.
+Sources : https://formsubmit.co/documentation et https://formsubmit.co/help

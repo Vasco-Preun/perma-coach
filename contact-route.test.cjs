@@ -1,42 +1,39 @@
-const fs = require('node:fs');
-const vm = require('node:vm');
+const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
-const ts = require('./node_modules/typescript');
-const source = ts.transpileModule(fs.readFileSync('app/api/contact/route.ts','utf8'), {compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText;
-(async()=>{
-for (const scenario of ['success','string-success','string-false','rejected','throws','bad-json','missing-success','activation','activation-success','invalid','malformed','storage-failure','chantier','preview']) {
- let reads=0, writes=0, sends=0, sent;
- const exports={};
- const sandbox={exports,process:{env:{VERCEL_ENV:scenario==='preview'?'preview':'production'}},AbortSignal,console:{error(){}},
- fetch:async(url,options)=>{
-  sends++;sent=JSON.parse(options.body);
-  assert.equal(url,'https://formsubmit.co/ajax/permacoach51@gmail.com');
-  assert.equal(options.method,'POST');assert.ok(options.signal);
-  if(scenario==='throws')throw Error('mock network failure');
-  return {ok:scenario!=='rejected',json:async()=>{
-   if(scenario==='bad-json')throw Error('not JSON');
-   if(scenario==='activation'||scenario==='activation-success')return {success:scenario==='activation-success'?'true':'false',message:'This form needs Activation'};
-   if(scenario==='string-false')return {success:'false'};
-   if(scenario==='missing-success')return {};
-   return {success:scenario==='string-success'?'true':true};
-  }};
- },require(name){
- if(name==='next/server')return {NextResponse:{json(body,options){return {body,status:options?.status||200}}}};
- if(name==='@/lib/kv')return {getKV:async()=>{reads++;return []},setKV:async()=>{writes++;if(scenario==='storage-failure')throw Error('mock')}};
- throw Error(name);
- }};
- vm.runInNewContext(source,sandbox);
- const body={name:'Test fictif',email:'test@example.com',message:'Message fictif',consent:scenario!=='invalid',_cc:'attacker@example.com',...(scenario==='chantier'?{eventType:'chantier',eventId:'fake',subject:'Inscription chantier'}:{})};
- const result=await exports.POST({json:async()=>{if(scenario==='malformed')throw Error('mock');return body}});
- const expected=['success','string-success','chantier','preview'].includes(scenario)?200:['activation','activation-success'].includes(scenario)?503:['invalid','malformed'].includes(scenario)?400:502;
- assert.equal(result.status,expected,scenario);
- if(['invalid','malformed','preview'].includes(scenario)){assert.equal(writes,0);assert.equal(reads,0)}
- if(['invalid','malformed','storage-failure'].includes(scenario))assert.equal(sends,0);
- if(sends){
- assert.equal(sent._replyto,body.email);assert.equal(sent._url,'https://www.lesjardinsduclos.com/contact');
- assert.equal(sent.message,body.message);assert.equal(sent._cc,undefined);
- if(scenario==='chantier')assert.equal(sent.eventId,'fake');
- }
- console.log('PASS '+scenario);
-}
+(async () => {
+ const browser = await chromium.launch({headless:true,channel:process.env.TEST_BROWSER_CHANNEL || 'msedge'});
+ try {
+  const page = await browser.newPage();
+  let sent = [], apiCalls = 0;
+  await page.route('https://formsubmit.co/**', async route => {
+   sent.push({url:route.request().url(),method:route.request().method(),fields:new URLSearchParams(route.request().postData())});
+   await route.fulfill({status:200,contentType:'text/html',body:'<h1>FormSubmit simulated</h1>'});
+  });
+  await page.route('**/api/contact',async route=>{apiCalls++;await route.abort()});
+  await page.route('**/api/events',route=>route.fulfill({json:[{id:'test-only',type:'chantier',title:'Chantier fictif',startDate:'2027-01-01'}]}));
+  for(const path of ['/contact','/inscription-chantier/test-only']) {
+   await page.goto('http://localhost:3100'+path);
+   const form=page.locator('form');
+   await form.locator('[name="name"]').fill('Test fictif');
+   await form.locator('[name="email"]').fill('test@example.com');
+   await form.locator('[name="message"]').fill('Aucune demande réelle');
+   if(path.includes('inscription'))await form.locator('[name="phone"]').fill('0000000000');
+   else await form.locator('[name="subject"]').fill('Sujet fictif');
+   const before=sent.length;
+   await form.locator('button[type="submit"]').click();
+   assert.equal(sent.length,before,'Unchecked consent must block submission');
+   await form.locator('[name="consent"]').check();
+   await Promise.all([page.waitForURL('https://formsubmit.co/**'),form.locator('button[type="submit"]').click()]);
+   const item=sent.at(-1);
+   assert.equal(item.url,'https://formsubmit.co/permacoach51@gmail.com');
+   assert.equal(item.method,'POST');
+   for(const [key,value] of Object.entries({name:'Test fictif',email:'test@example.com',message:'Aucune demande réelle',consent:'on',_url:'https://www.lesjardinsduclos.com/contact'}))assert.equal(item.fields.get(key),value);
+   assert.equal(item.fields.get('_captcha'),null,'Keep provider captcha enabled');
+   assert.equal(item.fields.get('_subject'),path.includes('inscription')?'Inscription au chantier : Chantier fictif':'Sujet fictif');
+   if(path.includes('inscription'))assert.equal(item.fields.get('eventId'),'test-only');
+   console.log('PASS browser serialization, consent, navigation: '+path);
+  }
+  assert.equal(apiCalls,0,'Browser must not call retired server relay');
+  console.log('PASS no contact API calls; all external submissions intercepted');
+ } finally {await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});
