@@ -23,6 +23,7 @@ export default function ContactForm({ onSubmit }: { onSubmit?: (data: ContactFor
     message: '',
     consent: false,
   })
+  const [submitError, setSubmitError] = useState('Une erreur est survenue. Veuillez réessayer.')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
@@ -41,11 +42,15 @@ export default function ContactForm({ onSubmit }: { onSubmit?: (data: ContactFor
           body: JSON.stringify(formData),
         })
 
-        if (!response.ok) throw new Error('Erreur lors de l\'envoi')
+        if (!response.ok) {
+          const result = await response.json().catch(() => ({}))
+          throw new Error(result.error || 'Envoi indisponible. Contactez-nous directement par email.')
+        }
       }
       setSubmitStatus('success')
       setFormData({ name: '', email: '', phone: '', subject: '', message: '', consent: false })
     } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Envoi indisponible. Contactez-nous directement par email.')
       setSubmitStatus('error')
     } finally {
       setIsSubmitting(false)
@@ -162,7 +167,7 @@ export default function ContactForm({ onSubmit }: { onSubmit?: (data: ContactFor
             exit={{ opacity: 0, y: -10 }}
             className="p-4 bg-red-50 text-red-800 rounded-2xl border border-red-200"
           >
-            Une erreur est survenue. Veuillez réessayer.
+            {submitError}
           </motion.div>
         )}
       </AnimatePresence>

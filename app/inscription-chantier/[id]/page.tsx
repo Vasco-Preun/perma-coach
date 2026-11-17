@@ -22,6 +22,7 @@ export default function InscriptionChantierPage() {
     message: '',
     consent: false,
   })
+  const [submitError, setSubmitError] = useState('Une erreur est survenue. Veuillez réessayer.')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
 
@@ -84,11 +85,15 @@ export default function InscriptionChantierPage() {
         }),
       })
 
-      if (!response.ok) throw new Error('Erreur lors de l\'envoi')
+      if (!response.ok) {
+          const result = await response.json().catch(() => ({}))
+          throw new Error(result.error || 'Envoi indisponible. Contactez-nous directement par email.')
+        }
       
       setSubmitStatus('success')
       setFormData({ name: '', email: '', phone: '', message: '', consent: false })
     } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : 'Envoi indisponible. Contactez-nous directement par email.')
       setSubmitStatus('error')
     } finally {
       setIsSubmitting(false)
@@ -241,7 +246,7 @@ export default function InscriptionChantierPage() {
 
                   {submitStatus === 'error' && (
                     <div className="p-4 bg-red-50 text-red-800 rounded-2xl border border-red-200">
-                      Une erreur est survenue. Veuillez réessayer.
+                      {submitError}
                     </div>
                   )}
 
