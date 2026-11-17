@@ -1,27 +1,37 @@
-# Prévisualisation du formulaire de contact
+# Prévisualisation du formulaire FormSubmit
 
 Branche : fix/contact-email. Ne pas fusionner dans main ni promouvoir en production sans accord explicite.
 
-## Configuration requise
-- RESEND_API_KEY : conserver la clé côté serveur, ne pas la partager dans le chat.
-- CONTACT_FROM_EMAIL : adresse d’expédition appartenant à un domaine vérifié dans Resend (format Nom <adresse@domaine>). Ne pas inventer une adresse Gmail comme expéditeur.
-- Le destinataire reste permacoach51@gmail.com.
+## Fonctionnement
+Les contacts et inscriptions chantier utilisent /api/contact, qui transmet des champs explicitement sélectionnés à https://formsubmit.co/ajax/permacoach51@gmail.com.
+Aucune configuration DNS OVH, clé Resend ou CONTACT_FROM_EMAIL n’est nécessaire pour ces deux formulaires.
+Les autres emails du site ne sont pas concernés.
 
-Documentation : https://resend.com/docs/knowledge-base/403-error-resend-dev-domain
+Le propriétaire doit activer le formulaire depuis l’email FormSubmit reçu dans permacoach51@gmail.com. Tant que le service demande une activation, l’interface affiche un avertissement.
+Le formulaire utilise une URL canonique stable : https://www.lesjardinsduclos.com/contact.
+Une réponse HTTP 200 ne suffit pas : le serveur exige success égal à true ou "true", et traite séparément les demandes d’activation.
+Un succès indique l’acceptation par FormSubmit ; la réception en boîte mail doit être vérifiée par le propriétaire.
 
-## Tests
-Le test `node contact-route.test.cjs` utilise uniquement des services simulés : aucun email réel, aucune lecture ou écriture dans un stockage client. Il couvre succès, refus Resend, exception réseau, configuration absente, saisie invalide, JSON invalide, échec de sauvegarde et inscription chantier.
+## Protection des contacts existants
+En environnement Vercel Preview (VERCEL_ENV=preview), /api/contact ne lit et n’écrit jamais la collection contacts. Les tests sur cette branche ne sont donc pas enregistrés dans l’administration.
+En production, le mécanisme de sauvegarde existant est conservé avant la transmission. Aucun contact existant n’a été consulté ou modifié pendant le travail.
+Les paiements restent hors périmètre.
 
-Avant tout test d’envoi sur Vercel Preview, vérifier que le stockage de prévisualisation est distinct du stockage de production. Ne pas soumettre de formulaire si cette isolation n’est pas confirmée. Un test réel enverra un message à permacoach51@gmail.com : coordonner ce test avec le propriétaire.
+## Validation
+`node contact-route.test.cjs` couvre 14 scénarios avec réseau et stockage simulés : succès booléen et chaîne, refus chaîne "false", erreur HTTP, panne réseau, JSON de réponse invalide, réponse ambiguë, activation avec deux valeurs de succès, saisie invalide, JSON de requête invalide, sauvegarde impossible, chantier et absence totale d’accès au stockage en Preview.
+Aucun email réel n’est envoyé par ces tests.
 
-## Validation avant production
-1. Vérifier que Vercel utilise main pour la production et fix/contact-email pour Preview.
-2. Vérifier le domaine expéditeur dans Resend et configurer CONTACT_FROM_EMAIL dans les environnements appropriés.
-3. Réussir le build Vercel et vérifier le rendu des deux formulaires.
-4. Tester refus et succès dans un environnement isolé, puis vérifier la réception du message fictif.
-5. Présenter le résultat et demander l’accord explicite avant fusion ou promotion en production.
+## Prochaine étape
+1. Attendre le statut Ready du nouveau commit sur Vercel Preview.
+2. Vérifier le rendu de /contact, puis convenir avec le propriétaire d’un unique message fictif de test.
+3. Le propriétaire clique sur le lien d’activation FormSubmit s’il le reçoit ; ne pas soumettre plusieurs fois en attendant cette activation.
+4. Effectuer ensuite un nouveau test fictif et confirmer la réception ainsi que la réponse à l’adresse du testeur.
+5. Demander l’accord explicite avant toute fusion ou promotion en production.
+
+Documentation officielle :
+- https://formsubmit.co/ajax-documentation
+- https://formsubmit.co/help
 
 ## Limites
-Le mécanisme de sauvegarde existant est conservé. Un échec email après sauvegarde peut entraîner un doublon si le visiteur soumet à nouveau ; l’interface explique donc que la demande est déjà enregistrée.
-Aucun appel FormSubmit n’a été trouvé dans le code actuel. L’origine des activations FormSubmit reste à établir.
-Les paiements et les données clients n’ont pas été consultés ou modifiés.
+L’envoi réel, l’activation et la réception ne sont pas encore validés. FormSubmit reçoit les données des futures demandes pour les transmettre au propriétaire. Sa FAQ indique une conservation des soumissions pendant 30 jours.
+Un échec email après sauvegarde en production peut entraîner un doublon si le visiteur soumet à nouveau ; l’interface explique que la demande est déjà enregistrée.
